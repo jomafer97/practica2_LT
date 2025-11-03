@@ -48,7 +48,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 💬 Otros miembros pueden revisar tu código, hacer comentarios o aprobar el merge.
 
 ### **Mantener tu rama actualizada con main**
-Antes de seguir trabajando, sincroniza tu rama para evitar conflictos futuros:
+    Antes de seguir trabajando, sincroniza tu rama para evitar conflictos futuros:
 
     ```bash
     git checkout main
