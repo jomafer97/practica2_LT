@@ -4,7 +4,7 @@
     Nunca trabajes directamente sobre main (hará que todo sea mucho más caótico)
     Crea una rama nueva para cada módulo o tarea:
 
-    ```shell
+    ```bash
     git checkout -b nombre-de-tu-rama
     ```
     Usa nombres cortos y descriptivos sin espacios
@@ -18,7 +18,7 @@
 
 3. **Subir tu rama al repositorio remoto**
 
-    ```shell
+    ```bash
     git push origin nombre-de-tu-rama
     ```
 
@@ -36,7 +36,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
 💬 Otros miembros pueden revisar tu código, hacer comentarios o aprobar el merge.
 
-## 5. **Mantener tu rama actualizada con main**
+5. **Mantener tu rama actualizada con main**
 Antes de seguir trabajando, sincroniza tu rama para evitar conflictos futuros:
 
     ```bash
@@ -46,7 +46,7 @@ Antes de seguir trabajando, sincroniza tu rama para evitar conflictos futuros:
     git merge main
     ```
 
-## 6. **Opcional. Borrar ramas viejas**
+6. **Opcional. Borrar ramas viejas**
     Después de que tu PR haya sido fusionado:
 
     ```bash
