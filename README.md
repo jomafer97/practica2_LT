@@ -7,7 +7,7 @@
 
     ```bash
     # Navega a la carpeta del frontend
-    cd frontend
+    cd Client
     
     # 1. Crea el entorno virtual (llámalo ".venv")
     python3 -m venv .venv
@@ -16,7 +16,7 @@
     source .venv/bin/activate
     
     # 3. Instala las dependencias (Kivy) dentro del entorno
-    pip install -r requirements.txt
+    pip install -r ../requirements.txt
     ```
     *Nota: Solo necesitas crear el entorno (`-m venv`) la primera vez. Las siguientes veces, solo necesitas activarlo (`source .venv/bin/activate`).*
 
@@ -25,7 +25,7 @@
 1.  **Frontend:**
     Navega a la carpeta `frontend/`, **activa el entorno virtual** y ejecuta la aplicación Kivy.
     ```bash
-    cd frontend
+    cd Client
     source .venv/bin/activate  # ¡Actívalo siempre!
     python3 main.py
     ```
