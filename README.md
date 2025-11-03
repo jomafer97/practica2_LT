@@ -1,6 +1,6 @@
 # Modificación del repositorio
 
-## 1. **Crear una rama de trabajo** 
+1. **Crear una rama de trabajo** 
     Nunca trabajes directamente sobre main (hará que todo sea mucho más caótico)
     Crea una rama nueva para cada módulo o tarea:
 
@@ -9,30 +9,30 @@
     ```
     Usa nombres cortos y descriptivos sin espacios
 
-## 2. **Hacer cambios y confirmarlos**        
+2. **Hacer cambios y confirmarlos**        
 
     ```shell
     git add .
     git commit -m "Descripción corta y clara del cambio realizado"
     ```
 
-## 3. **Subir tu rama al repositorio remoto**
+3. **Subir tu rama al repositorio remoto**
 
     ```shell
     git push origin nombre-de-tu-rama
     ```
 
-## 4. **Crear un Pull Request (PR)**
+4. **Crear un Pull Request (PR)**
 
 En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldrá la opción de hacer un Pull Request (PR)
 
-#### 1. **Selecciona tu rama como source (origen).**
+1. **Selecciona tu rama como source (origen).**
 
-#### 2. **Selecciona main como target (destino).**
+2. **Selecciona main como target (destino).**
 
-#### 3. **Añade un título y una descripción de lo que hiciste.**
+3. **Añade un título y una descripción de lo que hiciste.**
 
-#### 4. **Envía el Pull Request.**
+4. **Envía el Pull Request.**
 
 💬 Otros miembros pueden revisar tu código, hacer comentarios o aprobar el merge.
 
