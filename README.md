@@ -8,9 +8,9 @@
     git checkout -b nombre-de-tu-rama
     ```
     Usa nombres cortos y descriptivos sin espacios
-
+    
 ## 2. **Hacer cambios y confirmarlos**    
-
+    
     ```bash
     git add .
     git commit -m "Descripción corta y clara del cambio realizado"
@@ -45,6 +45,7 @@ Antes de seguir trabajando, sincroniza tu rama para evitar conflictos futuros:
     git checkout nombre-de-tu-rama
     git merge main
     ```
+
 ## 6. **Opcional. Borrar ramas viejas**
     Después de que tu PR haya sido fusionado:
 
