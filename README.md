@@ -2,7 +2,7 @@
 
 1.  **Clona el repositorio (si es la primera vez)** 
     
-    ⚠️ Si ya has clonado el repositorio antes, simplemente actualízalo ([Paso 6](#mantener-tu-rama-actualizada-con-main))
+    ⚠️ Si ya has clonado el repositorio antes, simplemente actualízalo ([+info](#mantener-tu-rama-actualizada-con-main))
     
     ```bash
     git clone git@github.com:jomafer97/practica2_LT.git
