@@ -9,8 +9,8 @@
     ```
     Usa nombres cortos y descriptivos sin espacios
 
-## 2. **Hacer cambios y confirmarlos**    
-    
+## 2. **Hacer cambios y confirmarlos**        
+
     ```bash
     git add .
     git commit -m "Descripción corta y clara del cambio realizado"
@@ -92,7 +92,7 @@ Antes de seguir trabajando, sincroniza tu rama para evitar conflictos futuros:
 ## 2. Ejecución
 
 1.  **Frontend:**
-    Navega a la carpeta `frontend/`, **activa el entorno virtual** y ejecuta la aplicación Kivy.
+    Navega a la carpeta `Client/`, **activa el entorno virtual** y ejecuta la aplicación Kivy.
     ```bash
     cd Client
     source .venv/bin/activate  # ¡Actívalo siempre!
