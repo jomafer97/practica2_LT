@@ -1,15 +1,15 @@
 # Modificación del repositorio
 
-1.  **Clona el repositorio (si es la primera vez)** 
-    
+1.  **Clona el repositorio (si es la primera vez)**
+
     ⚠️ Si ya has clonado el repositorio antes, simplemente actualízalo ([+info](#mantener-tu-rama-actualizada-con-main))
-    
+
     ```bash
     git clone git@github.com:jomafer97/practica2_LT.git
     cd practica2_LT
     ```
     Si os da fallo, es porque tendréis que configurar SSH con github pero no tiene mucha historia, chatgpt os lo explicará perfecto
-2. **Crear una rama de trabajo** 
+2. **Crear una rama de trabajo**
 
     Nunca trabajes directamente sobre main (hará que todo sea mucho más caótico)
     Crea una rama nueva para cada módulo o tarea:
@@ -20,7 +20,7 @@
     Usa nombres cortos y descriptivos sin espacios
 
     **Ya puedes modificar lo que necesites!**
-3. **Una vez hechos los cambios:**        
+3. **Una vez hechos los cambios:**
 
     ```bash
     git add .
@@ -75,13 +75,13 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
     ```bash
     # Navega a la carpeta del frontend
     cd Client
-    
+
     # 1. Crea el entorno virtual (llámalo ".venv")
     python3 -m venv .venv
-    
+
     # 2. Actívalo (verás (.venv) al inicio de tu línea de comandos)
     source .venv/bin/activate
-    
+
     # 3. Instala las dependencias (Kivy) dentro del entorno
     pip install -r ../requirements.txt
     ```
