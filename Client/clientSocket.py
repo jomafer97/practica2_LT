@@ -18,3 +18,6 @@ class ClientSocket:
             self.clientSocket.sendto(json.dumps(json_data).encode('utf-8'), addr)
         except Exception:
             print("Invalid format")
+
+    def close(self):
+        self.clientSocket.close()

@@ -1,23 +1,21 @@
 from serverSocket import ServerSocket
 import time
+import json
+
+# Cargamos el diccionario
+with open('codec_db.json', 'r') as file:
+    codec_db = json.load(file)
 
 server = ServerSocket('', 32003)
 
-message = {
-    "codec": "G.711",
-    "bitrate": 64.0,
-    "mensaje": "Prueba de JSON UDP"
-}
+message, addr = server.recv_message(1024)
 
-while True:
-    message, addr = server.recv_message(1024)
+recv_codec = message["codec"]
+print(f"El códec recibido ha sido: {recv_codec}")
 
-    message_str = message.decode("utf-8")
+print("Los parámetros de este códec son:")
 
-    print(message_str + '\n')
-    print(f"{addr}\n")
+print(json.dumps(codec_db[recv_codec], indent=2, sort_keys=False))
 
-    if message_str == "Bye":
-        time.sleep(5)
-        server.close()
-        break
+time.sleep(5)
+server.close()
