@@ -14,10 +14,7 @@ class ClientSocket:
         return json_data, address
 
     def send_message(self, json_data, addr):
-        try:
-            self.clientSocket.sendto(json.dumps(json_data).encode('utf-8'), addr)
-        except Exception:
-            print("Invalid format")
+        self.clientSocket.sendto(json.dumps(json_data).encode('utf-8'), addr)
 
     def close(self):
         self.clientSocket.close()
