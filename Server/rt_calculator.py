@@ -1,5 +1,5 @@
 from serverSocket import ServerSocket
-import logging
+from Shared.message_builder import build_message, validate_message
 import threading
 
 class Rt_calculator_service:
@@ -20,6 +20,11 @@ class Rt_calculator_service:
     def start(self):
         while True:
             message, addr = self.serviceSocket.recv_message(1024)
+
+            if validate_message(message, "RT_REQUEST"):
+                self.logger.info("RT CALCULATOR: Valid message received")
+                self.logger.info(message)
+
             thread = threading.Thread(
                 target=self.task,
                 args=(message, addr),

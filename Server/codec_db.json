@@ -6,7 +6,8 @@
     "VPS (B)": 160.0,
     "VPS (ms)": 20.0,
     "pps": 50.0,
-    "BW (Kbps)": 87.2
+    "BW (Kbps)": 87.2,
+    "Ralg (ms)": 0
   },
   "G.729": {
     "Bit Rate (Kbps)": 8.0,
@@ -15,7 +16,8 @@
     "VPS (B)": 20.0,
     "VPS (ms)": 20.0,
     "pps": 50.0,
-    "BW (Kbps)": 31.2
+    "BW (Kbps)": 31.2,
+    "Ralg (ms)": 5
   },
   "G.723.1_6.3": {
     "Bit Rate (Kbps)": 6.3,
@@ -24,7 +26,8 @@
     "VPS (B)": 24.0,
     "VPS (ms)": 30.0,
     "pps": 33.3,
-    "BW (Kbps)": 21.9
+    "BW (Kbps)": 21.9,
+    "Ralg (ms)": 7.5
   },
   "G.723.1_5.3": {
     "Bit Rate (Kbps)": 5.3,
@@ -33,7 +36,8 @@
     "VPS (B)": 20.0,
     "VPS (ms)": 30.0,
     "pps": 33.3,
-    "BW (Kbps)": 20.8
+    "BW (Kbps)": 20.8,
+    "Ralg (ms)": 7.5
   },
   "G.726_32k": {
     "Bit Rate (Kbps)": 32.0,
@@ -42,7 +46,8 @@
     "VPS (B)": 80.0,
     "VPS (ms)": 20.0,
     "pps": 50.0,
-    "BW (Kbps)": 55.2
+    "BW (Kbps)": 55.2,
+    "Ralg (ms)": 0
   },
   "G.726_24k": {
     "Bit Rate (Kbps)": 24.0,
@@ -51,7 +56,8 @@
     "VPS (B)": 20.0,
     "VPS (ms)": 20.0,
     "pps": 50.0,
-    "BW (Kbps)": 47.2
+    "BW (Kbps)": 47.2,
+    "Ralg (ms)": 0
   },
   "G.728": {
     "Bit Rate (Kbps)": 16.0,
@@ -60,7 +66,8 @@
     "VPS (B)": 60.0,
     "VPS (ms)": 30.0,
     "pps": 33.3,
-    "BW (Kbps)": 31.5
+    "BW (Kbps)": 31.5,
+    "Ralg (ms)": 2.5
   },
   "G722_64k": {
     "Bit Rate (Kbps)": 64.0,
@@ -69,7 +76,8 @@
     "VPS (B)": 160.0,
     "VPS (ms)": 20.0,
     "pps": 50.0,
-    "BW (Kbps)": 87.2
+    "BW (Kbps)": 87.2,
+    "Ralg (ms)": 0
   },
   "ilbc_mode_20": {
     "Bit Rate (Kbps)": 15.2,
@@ -78,7 +86,8 @@
     "VPS (B)": 38.0,
     "VPS (ms)": 20.0,
     "pps": 50.0,
-    "BW (Kbps)": 38.4
+    "BW (Kbps)": 38.4,
+    "Ralg (ms)": 0
   },
   "ilbc_mode_30": {
     "Bit Rate (Kbps)": 13.33,
@@ -87,6 +96,7 @@
     "VPS (B)": 50.0,
     "VPS (ms)": 30.0,
     "pps": 33.3,
-    "BW (Kbps)": 28.8
+    "BW (Kbps)": 28.8,
+    "Ralg (ms)": 0
   }
 }
