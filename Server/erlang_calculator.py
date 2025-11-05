@@ -2,17 +2,18 @@ from serverSocket import ServerSocket
 import logging
 import threading
 
-class Rt_calculator_service:
+class Erlang_calculator_service:
     def __init__(self, logger):
-        self.serviceSocket = ServerSocket('127.0.0.1', 32003)
+        self.serviceSocket = ServerSocket('127.0.0.1', 32004)
         self.logger = logger
+
 
     def task(self, message, addr):
         # TO DO
-        self.logger.info("RT CALCULATOR: Successfully called")
+        self.logger.info("ERLANG CALCULATOR: Succesfully called")
 
         result = {
-            "codec" : "LISTO"
+            "codec" : "ERLANG"
         }
 
         self.serviceSocket.send_message(result, addr)
@@ -30,4 +31,3 @@ class Rt_calculator_service:
 
     def close(self):
         self.serviceSocket.close()
-
