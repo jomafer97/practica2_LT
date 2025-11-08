@@ -1,38 +1,67 @@
 import json
 
 messages = {
-    # SOLICITUD DEL CÁLCULO DE RT
+    # RT CALCULATION REQUEST
     "RT_REQUEST": {
         "codec": None,
-        "jitter (ms)": None,
-        "vRed (Mbps)": None,
-        "rR (ms)": None
+        "jitter": None,           # (ms)
+        "networkSpeed": None,     # (Mbps)
+        "networkDelay": None      # (ms)
     },
 
     "RT_RESPONSE": {
-        "Rt2jit (ms)": None,
-        "Rt1.5jit (ms)": None,
-        "CSI (ms)": None,
-        "Rfis (ms)": None,
-        "Rpaq (ms)": None,
-        "Rs (ms)": None
+        "Rt2jit": None,           # (ms)
+        "Rt1_5jit": None,         # (ms)
+        "CSI": None,              # (ms)
+        "Rfis": None,             # (ms)
+        "Rpaq": None,             # (ms)
+        "Rs": None                # (ms)
     },
 
-    # SOLICITUD DEL CÁLCULO DEL COSTE
+    # TRAFFIC CALCULATION REQUEST
+    "ERLANG_REQUEST": {
+        "numChannels": None,        # (Channels)
+        "numCalls": None,           # (Calls)
+        "avgDuration": None,        # (s)
+        "blockingPercentage": None  # (%)
+    },
+
+    "ERLANG_RESPONSE": {
+        "Erlangs": None,            # (Erlang)
+        "maxNumCalls": None         # (Calls)
+    },
+
+    # BW CALCULATION REQUEST
+    "BW_REQUEST": {
+        "codec": None,
+        "extendedHeader": None,     # (bits),
+        "maxNumCalls": None,        # (Calls)
+        "BandWidth": None           # (bps)
+    },
+
+    "BW_RESPONSE": {
+        "uncompressedPktLength": None, # (bits)
+        "compressedPktLength": None,   # (bits)
+        "pps": None,                   # (packets per second)
+        "BandWidthcRTP": None,         # (bps)
+        "BandWidthRTP": None           # (bps)
+    },
+
+    # COST CALCULATION REQUEST
     "COST_REQUEST": {
-        "BWstRTP (Mbps)": None,
-        "BWstcRTP (Mbps)": None,
-        "Pmax (euros)": None,
-        "Nllamadas (llamadas)": None
+        "BWstRTP": None,            # (Mbps)
+        "BWstcRTP": None,           # (Mbps)
+        "Pmax": None,               # (euros)
+        "numCalls": None            # (calls)
     },
 
     "COST_RESPONSE": {
-        "PMbps (euros)": None,
-        "Verificar": None,
-        "NllamadasCumple (llamadas)": None
+        "PMbps": None,              # (euros)
+        "verification": None,
+        "compliantCalls": None      # (calls)
     },
 
-    # SOLICITUD DEL CÁLCULO DEL PLR
+    # PLR CALCULATION REQUEST
     "PLR_REQUEST": {
         "bitstream": None
     },
@@ -42,19 +71,22 @@ messages = {
         "q": None,
         "pi1": None,
         "pi0": None,
-        "E (paquetes)": None
+        "E": None                   # (packets)
     }
 }
 
-def build_message(type: str, params: dict) -> dict:
-    base_message = messages.get(type, {})
-
-    if not base_message:
-        return {}
+def build_message(type: str, **kwargs):
+    base_message = messages.get(type)
+    if base_message is None:
+        raise ValueError(f"Error: El tipo de mensaje '{type}' no se encontró en las plantillas.")
 
     message = base_message.copy()
 
-    message.update(params)
+    for key, value in kwargs.items():
+        if key in message:
+            message[key] = value
+        else:
+            raise KeyError(f"Error: El argumento '{key}' no es válido para el tipo de mensaje '{type}'.")
 
     return json.dumps(message, indent=4)
 

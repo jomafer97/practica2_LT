@@ -10,30 +10,16 @@ from Shared.message_builder import build_message, validate_message
 
 client = ClientSocket()
 
-params = {
-    "codec": "G.711",
-    "jitter (ms)": 20,
-    "vRed (Mbps)": 300,
-    "rR (ms)": 120
-}
-
-message = build_message("RT_REQUEST", params)
-
+message = build_message("RT_REQUEST", codec="G.711", jitter=20, networkSpeed=100, networkDelay=20)
+print(message)
 addr = ('127.0.0.1', 32003)
 
 client.send_message(message, addr)
 
 addr = ('127.0.0.1', 32004)
 
-params = {
-    "BWstRTP (Mbps)": 300,
-    "BWstcRTP (Mbps)": 200,
-    "Pmax (euros)": 1000,
-    "Nllamadas (llamadas)": 30
-}
-
-message = build_message("COST_REQUEST", params)
-
+message = build_message("ERLANG_REQUEST", numChannels=20, numCalls=10, avgDuration=5, blockingPercentage=2)
+print(message)
 client.send_message(message, addr)
 
 message, address = client.recv_message(1024)

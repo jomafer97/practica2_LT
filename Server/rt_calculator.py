@@ -25,13 +25,16 @@ class Rt_calculator_service:
                 self.logger.info("RT CALCULATOR: Valid message received")
                 self.logger.info(message)
 
-            thread = threading.Thread(
-                target=self.task,
-                args=(message, addr),
-                daemon=True
-            )
+                thread = threading.Thread(
+                    target=self.task,
+                    args=(message, addr),
+                    daemon=True
+                )
 
-            thread.start()
+                thread.start()
+            else:
+                self.logger.info("ERLANG CALCULATOR: Wrong message received")
+                pass
 
     def close(self):
         self.serviceSocket.close()
