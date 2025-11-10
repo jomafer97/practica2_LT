@@ -10,16 +10,16 @@ from Shared.message_builder import build_message, validate_message
 
 client = ClientSocket()
 
-message = build_message("RT_REQUEST", codec="G.711", jitter=20, networkSpeed=100, networkDelay=20)
-print(message)
-addr = ('127.0.0.1', 32003)
-
-client.send_message(message, addr)
+message = build_message(
+    "ERLANG_REQUEST",
+    numChannels=150,             # 100 lineas
+    numCalls=20,                # 500 Llamadas por hora
+    avgDuration=180,             # Duración promedio de la llamada: 180 segundos (3 minutos)
+    blockingPercentage=0.03         # Porcentaje máximo de bloqueo tolerado: 1%
+)
 
 addr = ('127.0.0.1', 32004)
 
-message = build_message("ERLANG_REQUEST", numChannels=20, numCalls=10, avgDuration=5, blockingPercentage=2)
-print(message)
 client.send_message(message, addr)
 
 message, address = client.recv_message(1024)
