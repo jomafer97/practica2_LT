@@ -23,7 +23,7 @@ messages = {
         "numChannels": None,        # (Channels)
         "numCalls": None,           # (Calls)
         "avgDuration": None,        # (s)
-        "blockingPercentage": None  # (%)
+        "blockingPercentage": None  # (0,1)
     },
 
     "ERLANG_RESPONSE": {
@@ -43,8 +43,8 @@ messages = {
         "uncompressedPktLength": None, # (bits)
         "compressedPktLength": None,   # (bits)
         "pps": None,                   # (packets per second)
-        "BandWidthcRTP": None,         # (bps)
-        "BandWidthRTP": None           # (bps)
+        "BWcRTP": None,         # (bps)
+        "BWRTP": None           # (bps)
     },
 
     # COST CALCULATION REQUEST
@@ -57,8 +57,14 @@ messages = {
 
     "COST_RESPONSE": {
         "PMbps": None,              # (euros)
-        "verification": None,
-        "compliantCalls": None      # (calls)
+        "RTP":{
+            "valid": None,
+            "calls": None
+        },
+        "cRTP":{
+            "valid": None,
+            "calls": None
+        }
     },
 
     # PLR CALCULATION REQUEST
@@ -77,7 +83,7 @@ messages = {
     # ERROR MESSAGES
     "ERROR":{
         "source": None,
-        "message": None
+        "error": None
     }
 }
 
