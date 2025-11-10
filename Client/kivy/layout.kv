@@ -1,0 +1,68 @@
+<ImageButton@ButtonBehavior+Image>:
+    allow_stretch: True
+    keep_ratio: True
+
+<MainPanel>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: 0.4
+        ImageButton:
+            id: softphone_origen
+            name: 'softphone_origen'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/softphone.png'
+        ImageButton:
+            id: red_transporte
+            name: 'red_transporte'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/network.png'
+        ImageButton:
+            id: softphone_destino
+            name: 'softphone_destino'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/softphone.png'
+
+    Button:
+        text: 'Parámetros Globales (GoS/Costes)'
+        size_hint_y: 0.15
+        font_size: '18sp'
+        on_press: root.open_global_popup()
+
+    Label:
+        id: panel_resultados
+        text: 'Resultados y Alertas se mostrarán aquí.'
+        size_hint_y: 0.45
+        canvas.before:
+            Color:
+                rgba: 0.1, 0.1, 0.1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+<ConfigPopup>:
+    title: root.title_text
+    size_hint: (0.9, 0.9)
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        ScrollView:
+            id: scroll_content
+            size_hint_y: 0.85
+        Button:
+            text: 'Guardar y Cerrar'
+            size_hint_y: 0.15
+            font_size: '16sp'
+            on_press: root.dismiss()
+
+<GridForm>:
+    cols: 2
+    spacing: 10
+    size_hint_y: None
+    height: self.minimum_height
+    row_default_height: 40
+    row_force_default: True
