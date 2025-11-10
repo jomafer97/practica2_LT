@@ -6,18 +6,27 @@ class Rt_calculator_service:
     def __init__(self, logger):
         self.serviceSocket = ServerSocket('127.0.0.1', 32003)
         self.logger = logger
+        self.ID = "RT_CALCULATOR"
 
     def task(self, message, addr):
         # TO DO
-        self.logger.info("RT CALCULATOR: Successfully called")
+        self.logger.info(f"{self.ID}: Successfully called")
 
-        response = build_message(
-            "ERLANG_REQUEST",
-            numChannels=20,
-            numCalls=10,
-            avgDuration=5,
-            blockingPercentage=2
-        )
+        try:
+            response = build_message(
+                "ERLANG_REQUEST",
+                numChannels=20,
+                numCalls=10,
+                avgDuration=5,
+                blockingPercentage=2
+            )
+
+        except Exception as e:
+            response = build_message(
+                "ERROR",
+                source=self.ID,
+                message=str(e)
+            )
 
         self.serviceSocket.send_message(response, addr)
 
@@ -25,8 +34,9 @@ class Rt_calculator_service:
         while True:
             message, addr = self.serviceSocket.recv_message(1024)
 
-            if validate_message(message, "RT_REQUEST"):
-                self.logger.info("RT CALCULATOR: Valid message received")
+            try:
+                validate_message(message, "RT_REQUEST")
+                self.logger.info(f"{self.ID}: Valid message received")
                 self.logger.info(message)
 
                 thread = threading.Thread(
@@ -36,9 +46,11 @@ class Rt_calculator_service:
                 )
 
                 thread.start()
-            else:
-                self.logger.info("ERLANG CALCULATOR: Wrong message received")
-                pass
+
+            except Exception as e:
+                self.logger.error(f"{self.ID}: {str(e)}")
+                error_msg = build_message("ERROR", source=self.ID, message=str(e))
+                self.serviceSocket.send_message(error_msg, addr)
 
     def close(self):
         self.serviceSocket.close()
