@@ -6,6 +6,8 @@ if project_root not in sys.path:
 
 from rt_calculator import Rt_calculator_service
 from erlang_calculator import Erlang_calculator_service
+from bw_calculator import BW_calculator_service
+from cost_calculator import Cost_calculator_service
 from server_logs import Server_logger
 
 class Server:
@@ -13,7 +15,9 @@ class Server:
         self.serv_logger = Server_logger()
         self.services = [
             Rt_calculator_service(self.serv_logger.logger),
-            Erlang_calculator_service(self.serv_logger.logger)
+            Erlang_calculator_service(self.serv_logger.logger),
+            Cost_calculator_service(self.serv_logger.logger),
+            BW_calculator_service(self.serv_logger.logger)
         ]
         self.service_threads = []
 

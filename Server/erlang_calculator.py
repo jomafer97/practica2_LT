@@ -24,7 +24,6 @@ class Erlang_calculator_service:
 
 
     def task(self, message, addr):
-
         numChannels = message ["numChannels"]
         numCalls= message["numCalls"]
         avgDuration = message["avgDuration"]
@@ -33,6 +32,7 @@ class Erlang_calculator_service:
 
         A = (numChannels*numCalls*avgDuration)/3600
         maxNum = self.needed_lines(A, blockingPercentage)
+
         result = build_message(
             "ERLANG_RESPONSE",
             Erlangs=A,
