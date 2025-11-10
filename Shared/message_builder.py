@@ -36,7 +36,7 @@ messages = {
         "codec": None,
         "extendedHeader": None,     # (bits),
         "maxNumCalls": None,        # (Calls)
-        "ReservedBW": None           # (bps)
+        "ReservedBW": None          # (0, 1)
     },
 
     "BW_RESPONSE": {

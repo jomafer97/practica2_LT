@@ -30,6 +30,25 @@ class Rt_calculator_service:
             raise RuntimeError(error_msg)
 
     def task(self, message, addr):
+        codec = message["codec"]
+        jitter = message["jitter"]
+        netSpeed = message["networkSpeed"]
+        netDelay = message["networkDelay"]
+
+        if codec not in self.db:
+            self.logger.error(f"{self.ID}: Invalid codec received '{codec}'")
+            response = build_message(
+                "ERROR",
+                source=self.ID,
+                error=f"Provided codec is not registered {codec}"
+            )
+            self.serviceSocket.send_message(response, addr)
+            return
+
+        codec_data = self.db["codec"]
+
+        CSI = codec_data["CSI (ms)"]
+        Packet = codec_data["VPS (ms)"] - codec_data["CSI (ms)"]
         try:
             response = build_message(
                 "ERLANG_REQUEST",
