@@ -13,7 +13,7 @@ messages = {
         "Rt2jit": None,           # (ms)
         "Rt1_5jit": None,         # (ms)
         "CSI": None,              # (ms)
-        "Rfis": None,             # (ms)
+        "Rphy": None,             # (ms)
         "Rpaq": None,             # (ms)
         "Rs": None                # (ms)
     },
@@ -72,6 +72,12 @@ messages = {
         "pi1": None,
         "pi0": None,
         "E": None                   # (packets)
+    },
+
+    # ERROR MESSAGES
+    "ERROR":{
+        "source": None,
+        "message": None
     }
 }
 

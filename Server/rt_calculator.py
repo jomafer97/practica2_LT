@@ -11,11 +11,15 @@ class Rt_calculator_service:
         # TO DO
         self.logger.info("RT CALCULATOR: Successfully called")
 
-        result = {
-            "codec" : "LISTO"
-        }
+        response = build_message(
+            "ERLANG_REQUEST",
+            numChannels=20,
+            numCalls=10,
+            avgDuration=5,
+            blockingPercentage=2
+        )
 
-        self.serviceSocket.send_message(result, addr)
+        self.serviceSocket.send_message(response, addr)
 
     def start(self):
         while True:
