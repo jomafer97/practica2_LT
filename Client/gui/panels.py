@@ -6,7 +6,15 @@ from kivy.uix.button import Button
 from .popups import ConfigPopup, GridForm
 from kivy.app import App  # ✅ Para acceder a la app global
 import json
+import sys
+import os
 
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from clientSocket import ClientSocket
+from Shared.message_builder import build_message, validate_message
 
 # ✅ NUEVO: Diccionario de Codecs filtrado (sin "Pobre" y "Mala")
 CODEC_QOE_MAP = {
@@ -335,8 +343,7 @@ class MainPanel(BoxLayout):
         message = {
             "codec": codec or "G.711",
             "jitter": jitter or 30,
-            "networkSpeed": network_speed_mbps or 1.0,
-            "networkDelay": network_delay_ms or 0.0,
+            "netDelay": network_delay_ms or 0.0,
         }
 
         send_ok = False
@@ -361,8 +368,7 @@ class MainPanel(BoxLayout):
                         **{
                             "codec": message["codec"],
                             "jitter": message["jitter"],
-                            "networkSpeed": message["networkSpeed"],
-                            "networkDelay": message["networkDelay"],
+                            "netDelay": message["netDelay"],
                         },
                     )
                 except Exception:
@@ -371,6 +377,8 @@ class MainPanel(BoxLayout):
             client = ClientSocket()
             addr = ("127.0.0.1", 32003)
             client.send_message(payload, addr)
+            payload, address = client.recv_message(1024)
+            print(payload)
             send_ok = True
         except Exception as e:
             send_err = str(e)
