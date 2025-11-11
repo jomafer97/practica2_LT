@@ -53,13 +53,13 @@ class Rt_calculator_service:
         rjitter2 = 2*jitter
         rjitter15 = 1.5*jitter
 
-        rt2 = csi + packet + algD + rjitter2 + netDelay
-        rt15 = csi + packet + algD + rjitter15 + netDelay
+        rt2 = csi + packet + algD + rjitter2 + netDelay + rphy
+        rt15 = csi + packet + algD + rjitter15 + netDelay + rphy
 
         response = build_message(
             "RT_RESPONSE",
             rt2jit=rt2,
-            rt1_5jit= rt15,
+            rt1_5jit=rt15,
             csi=csi,
             rphy=rphy,
             rpac=packet

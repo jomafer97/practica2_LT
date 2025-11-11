@@ -16,5 +16,8 @@ class ClientSocket:
     def send_message(self, json_data, addr):
         self.clientSocket.sendto(json.dumps(json_data).encode('utf-8'), addr)
 
+    def set_timeout(self, timeout):
+        self.clientSocket.timeout(timeout)
+
     def close(self):
         self.clientSocket.close()
