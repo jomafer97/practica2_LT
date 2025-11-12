@@ -49,9 +49,6 @@ class SecondWindow(Screen):
         super().__init__(**kwargs)
         self.add_widget(MainPanel())
 
-        # ✅ MODIFICADO: Eliminado todo el bloque de self.summary_label
-        # --- Fin del resumen ---
-
         button_back = Button(
             text="BACK",
             size_hint=(None, None),
@@ -100,9 +97,6 @@ class ThirdWindow(Screen):
         super().__init__(**kwargs)
         self.add_widget(MainPanel())
 
-        # ✅ MODIFICADO: Eliminado todo el bloque de self.summary_label
-        # --- Fin del resumen ---
-
         button_back = Button(
             text="BACK",
             size_hint=(None, None),
@@ -123,7 +117,6 @@ class ThirdWindow(Screen):
         button_next.bind(on_release=self.go_next)
         self.add_widget(button_next)
 
-    # ✅ NUEVO: Actualiza la barra de estado al entrar en la pantalla
     def on_enter(self, *args):
         main_panel = None
         for widget in self.children:
@@ -132,7 +125,6 @@ class ThirdWindow(Screen):
                 break
 
         if main_panel and "status_bar" in main_panel.ids:
-            # Puedes cambiar este texto por el que corresponda
             main_panel.ids.status_bar.text = "[b]Paso 3:[/b] Parámetros de Tráfico"
 
     def go_back(self, w):
@@ -151,9 +143,6 @@ class FourthWindow(Screen):
         super().__init__(**kwargs)
         self.add_widget(MainPanel())
 
-        # ✅ MODIFICADO: Eliminado todo el bloque de self.summary_label
-        # --- Fin del resumen ---
-
         button_back = Button(
             text="BACK",
             size_hint=(None, None),
@@ -174,7 +163,6 @@ class FourthWindow(Screen):
         button_next.bind(on_release=self.go_next)
         self.add_widget(button_next)
 
-    # ✅ NUEVO: Actualiza la barra de estado al entrar en la pantalla
     def on_enter(self, *args):
         main_panel = None
         for widget in self.children:
