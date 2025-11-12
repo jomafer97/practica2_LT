@@ -1,7 +1,7 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 from kivy.lang import Builder
-from .gui.screens import (
+from gui.screens import (
     MainWindow,
     SecondWindow,
     ThirdWindow,

@@ -4,19 +4,19 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.button import Button
 from .popups import ConfigPopup, GridForm
-from kivy.app import App  # ✅ Para acceder a la app global
+from kivy.app import App
 import json
-import sys
-import os
+import os, sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Asegurar que el proyecto raíz esté en sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from clientSocket import ClientSocket
 from Shared.message_builder import build_message, validate_message
+from clientSocket import ClientSocket
+from .send_data import send_data_handler  # ✅ Importamos la función separada
 
-# ✅ NUEVO: Diccionario de Codecs filtrado (sin "Pobre" y "Mala")
 CODEC_QOE_MAP = {
     "Excelente": ("G.711", "G722_64k"),
     "Buena": ("G.729", "G.726", "ilbc_mode_20"),
@@ -34,28 +34,23 @@ class MainPanel(BoxLayout):
             self.open_destino_popup()
 
     def open_softphone_popup(self):
-        # ✅ CORREGIDO: Definir la sección
         section = "Softphone (Origen)"
         form = GridForm()
 
         form.add_widget(Label(text="Calidad Voz (QoE):"))
-        # ✅ MODIFICADO: Valores sin "Pobre" y "Mala"
         qoe_spinner = Spinner(text="Buena", values=("Excelente", "Buena", "Normal"))
         form.add_widget(qoe_spinner)
 
         form.add_widget(Label(text="Codec (elegido):"))
-        # Lista inicial (se filtrará)
         codec_spinner = Spinner(text="G.711", values=CODEC_QOE_MAP["Buena"])
         form.add_widget(codec_spinner)
 
-        # ✅ NUEVO: Lógica para vincular el primer spinner al segundo
         qoe_spinner.bind(
             text=lambda spinner, text: self.on_qoe_select(
                 spinner, text, codec_spinner, section
             )
         )
 
-        # ✅ VINCULAR (bind) widgets al actualizador en vivo
         qoe_spinner.bind(
             text=lambda instance, value: self._live_update_data(
                 instance, value, section, "QoE"
@@ -67,7 +62,6 @@ class MainPanel(BoxLayout):
             )
         )
 
-        # Nuevo: campo para introducir jitter (ms) manualmente
         form.add_widget(Label(text="Jitter (ms):"))
         jitter_input = TextInput(multiline=False, input_filter="float")
         form.add_widget(jitter_input)
@@ -146,10 +140,8 @@ class MainPanel(BoxLayout):
         if not hasattr(app, "destination_results_widgets"):
             app.destination_results_widgets = {}
 
-        # Limpiar referencias antiguas
         app.destination_results_widgets.clear()
 
-        # Lista de campos de resultado que pediste
         field_names = [
             "Rt2jit (ms)",
             "Rt1_5jit (ms)",
@@ -162,17 +154,11 @@ class MainPanel(BoxLayout):
         for field_name in field_names:
             form.add_widget(Label(text=f"{field_name}:"))
 
-            # Crear el TextInput deshabilitado
             result_input = TextInput(
                 text="---",
                 multiline=False,
                 disabled=True,
-                background_color=(
-                    0.2,
-                    0.2,
-                    0.2,
-                    1,
-                ),  # Color para que parezca deshabilitado
+                background_color=(0.2, 0.2, 0.2, 1),
             )
             form.add_widget(result_input)
 
@@ -264,7 +250,7 @@ class MainPanel(BoxLayout):
         """Formatea los datos del resumen y los muestra en el Label."""
         app = App.get_running_app()
         if not hasattr(app, "summary_data"):
-            return  # Nada que mostrar
+            return
 
         summary_str = "RESUMEN DE CONFIGURACIÓN (PASO 1):\n"
 
@@ -286,112 +272,4 @@ class MainPanel(BoxLayout):
             print("Error: No se encontró 'panel_resultados' en self.ids")
 
     def send_data(self, *args):
-        """Recolecta summary_data y envía una petición RT_REQUEST al servicio RT (127.0.0.1:32003).
-        Manejamos imports de forma tolerante: si no están disponibles los módulos de red se mostrará
-        un popup con la información que se habría enviado.
-        """
-        app = App.get_running_app()
-        summary = getattr(app, "summary_data", {}) if app else {}
-
-        pretty = json.dumps(summary, indent=2, ensure_ascii=False)
-
-        if not summary:
-            form = GridForm()
-            form.add_widget(Label(text="No hay datos para enviar."))
-            popup = ConfigPopup(title_text="Enviar Datos - Error", content_widget=form)
-            popup.open()
-            return
-
-        codec = None
-        jitter = None
-        network_speed_mbps = None
-        network_delay_ms = None
-
-        try:
-            codec = summary.get("Softphone (Origen)", {}).get("Codec")
-            jitter_val = summary.get("Softphone (Origen)", {}).get("Jitter (ms)")
-            if jitter_val:
-                try:
-                    jitter = float(str(jitter_val))
-                except Exception:
-                    jitter = None
-            else:
-                qoe = summary.get("Softphone (Origen)", {}).get("QoE")
-                if qoe:
-                    qoe_map = {"Excelente": 5, "Buena": 20, "Normal": 50}
-                    jitter = qoe_map.get(qoe, 30)
-                else:
-                    jitter = None
-
-            vel = summary.get("Red de Transporte", {}).get("Velocidad Red")
-            if vel:
-                try:
-                    vel_val = float(str(vel))
-                    network_speed_mbps = vel_val / 1000.0
-                except Exception:
-                    network_speed_mbps = None
-
-            ret = summary.get("Red de Transporte", {}).get("Retardo Red")
-            if ret:
-                try:
-                    network_delay_ms = float(str(ret))
-                except Exception:
-                    network_delay_ms = None
-        except Exception:
-            pass
-
-        message = {
-            "codec": codec or "G.711",
-            "jitter": jitter or 30,
-            "netDelay": network_delay_ms or 0.0,
-        }
-
-        send_ok = False
-        send_err = None
-
-        try:
-            try:
-                from clientSocket import ClientSocket
-            except Exception:
-                from ..clientSocket import ClientSocket
-
-            try:
-                from Shared.message_builder import build_message
-            except Exception:
-                build_message = None
-
-            payload = message
-            if build_message:
-                try:
-                    payload = build_message(
-                        "RT_REQUEST",
-                        **{
-                            "codec": message["codec"],
-                            "jitter": message["jitter"],
-                            "netDelay": message["netDelay"],
-                        },
-                    )
-                except Exception:
-                    payload = message
-
-            client = ClientSocket()
-            addr = ("127.0.0.1", 32003)
-            client.send_message(payload, addr)
-            payload, address = client.recv_message(1024)
-            print(payload)
-            send_ok = True
-        except Exception as e:
-            send_err = str(e)
-
-        form = GridForm()
-        if send_ok:
-            form.add_widget(Label(text="Datos enviados correctamente al servicio RT."))
-        else:
-            form.add_widget(Label(text=f"No se pudo enviar: {send_err}"))
-
-        form.add_widget(Label(text="\n--- Payload (JSON) ---\n"))
-        payload_label = Label(text=json.dumps(message, indent=2, ensure_ascii=False))
-        form.add_widget(payload_label)
-
-        popup = ConfigPopup(title_text="Enviar Datos - Resultado", content_widget=form)
-        popup.open()
+        send_data_handler(self)
