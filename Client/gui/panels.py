@@ -8,14 +8,13 @@ from kivy.app import App
 import json
 import os, sys
 
-# Asegurar que el proyecto raíz esté en sys.path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
 from Shared.message_builder import build_message, validate_message
 from clientSocket import ClientSocket
-from .send_data import send_data_handler  # ✅ Importamos la función separada
+from .message_sender import MessageSender
 
 CODEC_QOE_MAP = {
     "Excelente": ("G.711", "G722_64k"),
@@ -271,5 +270,18 @@ class MainPanel(BoxLayout):
         else:
             print("Error: No se encontró 'panel_resultados' en self.ids")
 
-    def send_data(self, *args):
-        send_data_handler(self)
+    def send_data(self):
+        app = App.get_running_app()
+        summary = getattr(app, "summary_data", {})
+
+        payload = {
+            "codec": summary.get("Softphone (Origen)", {}).get("Codec", "G.711"),
+            "jitter": float(
+                summary.get("Softphone (Origen)", {}).get("Jitter (ms)", 30)
+            ),
+            "netDelay": float(
+                summary.get("Red de Transporte", {}).get("Retardo Red", 0)
+            ),
+        }
+
+        MessageSender.send("RT_REQUEST", payload)
