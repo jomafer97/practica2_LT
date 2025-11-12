@@ -57,7 +57,7 @@ def send_data_handler(self, *args):
     except Exception:
         pass
 
-    message = {
+    messageFormat = {
         "codec": codec or "G.711",
         "jitter": jitter or 30,
         "netDelay": network_delay_ms or 0.0,
@@ -66,21 +66,20 @@ def send_data_handler(self, *args):
     send_ok = False
     send_err = None
 
-    payload = message
-    payload = build_message(
+    message = build_message(
         "RT_REQUEST",
         **{
-            "codec": message["codec"],
-            "jitter": message["jitter"],
-            "netDelay": message["netDelay"],
+            "codec": messageFormat["codec"],
+            "jitter": messageFormat["jitter"],
+            "netDelay": messageFormat["netDelay"],
         },
     )
 
     client = ClientSocket()
     addr = ("127.0.0.1", 32003)
-    client.send_message(payload, addr)
-    payload, addr = client.recv_message(1024)
-    print(payload)
+    client.send_message(message, addr)
+    answer, addr = client.recv_message(1024)
+    print(answer)
     send_ok = True
 
     form = GridForm()
