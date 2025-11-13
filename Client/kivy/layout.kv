@@ -26,12 +26,6 @@
             on_press: root.handle_button_press(self.name)
             source: 'assets/softphone.png'
 
-    Button:
-        text: 'Parámetros Globales (GoS/Costes)'
-        size_hint_y: 0.15
-        font_size: '18sp'
-        on_press: root.open_global_popup()
-
     ScrollView:
         size_hint_y: 0.45
         do_scroll_x: False
@@ -45,7 +39,7 @@
 
             Label:
                 id: panel_resultados
-                text: 'Resultados y Alertas se mostrarán aquí.'
+                text: 'Parámetros para calcular QoS se mostrarán aquí.'
                 size_hint_y: None
                 text_size: self.width, None
                 height: self.texture_size[1]
@@ -87,3 +81,62 @@
     height: self.minimum_height
     row_default_height: 40
     row_force_default: True
+
+<Step2Panel>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+    
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: 0.35
+        ImageButton:
+            id: softphone_origen
+            source: 'assets/softphone.png'
+        ImageButton:
+            id: red_transporte
+            source: 'assets/network.png'
+        ImageButton:
+            id: softphone_destino
+            source: 'assets/softphone.png'
+            on_press: root.handle_button_press('softphone_destino')
+
+    Button:
+        text: 'PARÁMETROS GLOBALES'
+        size_hint_y: 0.1
+        font_size: '16sp'
+        background_color: (0.6, 0.2, 0.8, 1)
+        on_press: root.open_global_popup()
+
+    ScrollView:
+        size_hint_y: 0.4
+        do_scroll_x: False
+        do_scroll_y: True
+        bar_width: '8dp'
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            padding: 4
+
+            Label:
+                id: panel_resultados
+                text: 'Parámetros para calcular GoS se mostrarán aquí.'
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                markup: True
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+    Button:
+        text: 'Enviar Paso 2'
+        size_hint_y: 0.15
+        font_size: '16sp'
+        background_color: (0.2, 0.8, 0.2, 1)
+        on_press: root.send_global_data()

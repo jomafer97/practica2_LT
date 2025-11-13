@@ -1,219 +1,135 @@
+"""
+Pantallas simplificadas usando MainPanel y Step2Panel.
+Cada Screen simplemente agrega el Panel correspondiente + botones de navegación.
+"""
+
 from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.app import App
 from .panels import MainPanel
+from .panel_2 import Step2Panel
 
 
-class MainWindow(Screen):
-    """Pantalla 1: Solo botón NEXT"""
-
+class BaseScreen(Screen):
+    """Clase base para todas las pantallas."""
+    
+    title = "Paso"
+    show_back = False
+    show_next = True
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(MainPanel())
-
-        # ✅ MODIFICADO: Eliminado todo el bloque de self.summary_label
-        # --- Fin del resumen ---
-
-        button_next = Button(
-            text="NEXT",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0.875, "y": 0},
-            background_color=(0.2, 0.6, 1, 1),
-        )
-        button_next.bind(on_release=self.go)
-        self.add_widget(button_next)
-
-    # ✅ NUEVO: Actualiza la barra de estado al entrar en la pantalla
-    def on_enter(self, *args):
-        # Buscamos el widget MainPanel dentro de esta pantalla
-        main_panel = None
-        for widget in self.children:
-            if isinstance(widget, MainPanel):
-                main_panel = widget
-                break
-
-        # Si lo encontramos y tiene el id 'status_bar', actualizamos su texto
-        if main_panel and "status_bar" in main_panel.ids:
-            main_panel.ids.status_bar.text = "[b]Paso 1:[/b] Configuración Inicial"
-
-    def go(self, w):
+        layout = BoxLayout(orientation='vertical')
+        
+        # Panel principal
+        self.panel = MainPanel()
+        layout.add_widget(self.panel)
+        
+        # Botones de navegación
+        button_layout = BoxLayout(size_hint_y=0.15, spacing=10, padding=5)
+        
+        if self.show_back:
+            back_btn = Button(text="◄ BACK", background_color=(1, 0.5, 0.2, 1))
+            back_btn.bind(on_press=self._go_back)
+            button_layout.add_widget(back_btn)
+        
+        if self.show_next:
+            next_btn = Button(text="NEXT ►", background_color=(0.2, 0.6, 1, 1))
+            next_btn.bind(on_press=self._go_next)
+            button_layout.add_widget(next_btn)
+        
+        layout.add_widget(button_layout)
+        self.add_widget(layout)
+    
+    def on_enter(self):
+        """Actualiza la barra de estado al entrar en la pantalla."""
+        if hasattr(self.panel, 'ids') and 'status_bar' in self.panel.ids:
+            self.panel.ids.status_bar.text = f"[b]{self.title}[/b]"
+    
+    def _go_back(self, *args):
         app = App.get_running_app()
-        self.manager.switch_to(app.second_window, direction="left")
+        screens = [app.main_window, app.second_window, app.third_window, app.fourth_window, app.fifth_window]
+        current_idx = screens.index(self)
+        if current_idx > 0:
+            self.manager.switch_to(screens[current_idx - 1], direction="right")
+    
+    def _go_next(self, *args):
+        app = App.get_running_app()
+        screens = [app.main_window, app.second_window, app.third_window, app.fourth_window, app.fifth_window]
+        current_idx = screens.index(self)
+        if current_idx < len(screens) - 1:
+            self.manager.switch_to(screens[current_idx + 1], direction="left")
+
+
+class MainWindow(BaseScreen):
+    """Pantalla 1: Configuración Inicial"""
+    title = "Paso 1: Configuración Inicial"
+    show_back = False
+    show_next = True
 
 
 class SecondWindow(Screen):
-    """Pantalla 2: BACK / NEXT"""
-
+    """Pantalla 2: ERLANG + Parámetros Globales"""
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(MainPanel())
-
-        button_back = Button(
-            text="BACK",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0, "y": 0},
-            background_color=(1, 0.5, 0.2, 1),
-        )
-        button_back.bind(on_release=self.go_back)
-        self.add_widget(button_back)
-
-        button_next = Button(
-            text="NEXT",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0.875, "y": 0},
-            background_color=(0.2, 0.6, 1, 1),
-        )
-        button_next.bind(on_release=self.go_next)
-        self.add_widget(button_next)
-
-    # ✅ NUEVO: Actualiza la barra de estado al entrar en la pantalla
-    def on_enter(self, *args):
-        main_panel = None
-        for widget in self.children:
-            if isinstance(widget, MainPanel):
-                main_panel = widget
-                break
-
-        if main_panel and "status_bar" in main_panel.ids:
-            # Puedes cambiar este texto por el que corresponda
-            main_panel.ids.status_bar.text = "[b]Paso 2:[/b] Parámetros de Red"
-
-    def go_back(self, w):
+        layout = BoxLayout(orientation='vertical')
+        
+        # Panel específico para Paso 2
+        self.panel = Step2Panel()
+        layout.add_widget(self.panel)
+        
+        # Botones de navegación
+        button_layout = BoxLayout(size_hint_y=0.15, spacing=10, padding=5)
+        
+        back_btn = Button(text="◄ BACK", background_color=(1, 0.5, 0.2, 1))
+        back_btn.bind(on_press=self._go_back)
+        button_layout.add_widget(back_btn)
+        
+        next_btn = Button(text="NEXT ►", background_color=(0.2, 0.6, 1, 1))
+        next_btn.bind(on_press=self._go_next)
+        button_layout.add_widget(next_btn)
+        
+        layout.add_widget(button_layout)
+        self.add_widget(layout)
+    
+    def on_enter(self):
+        """Actualiza la barra de estado al entrar en la pantalla."""
+        if hasattr(self.panel, 'ids') and 'status_bar' in self.panel.ids:
+            self.panel.ids.status_bar.text = "[b]Paso 2: ERLANG + Parámetros Globales[/b]"
+    
+    def _go_back(self, *args):
         app = App.get_running_app()
-        self.manager.switch_to(app.main_window, direction="right")
-
-    def go_next(self, w):
+        screens = [app.main_window, app.second_window, app.third_window, app.fourth_window, app.fifth_window]
+        current_idx = screens.index(self)
+        if current_idx > 0:
+            self.manager.switch_to(screens[current_idx - 1], direction="right")
+    
+    def _go_next(self, *args):
         app = App.get_running_app()
-        self.manager.switch_to(app.third_window, direction="left")
+        screens = [app.main_window, app.second_window, app.third_window, app.fourth_window, app.fifth_window]
+        current_idx = screens.index(self)
+        if current_idx < len(screens) - 1:
+            self.manager.switch_to(screens[current_idx + 1], direction="left")
 
 
-class ThirdWindow(Screen):
-    """Pantalla 3"""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.add_widget(MainPanel())
-
-        button_back = Button(
-            text="BACK",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0, "y": 0},
-            background_color=(1, 0.5, 0.2, 1),
-        )
-        button_back.bind(on_release=self.go_back)
-        self.add_widget(button_back)
-
-        button_next = Button(
-            text="NEXT",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0.875, "y": 0},
-            background_color=(0.2, 0.6, 1, 1),
-        )
-        button_next.bind(on_release=self.go_next)
-        self.add_widget(button_next)
-
-    def on_enter(self, *args):
-        main_panel = None
-        for widget in self.children:
-            if isinstance(widget, MainPanel):
-                main_panel = widget
-                break
-
-        if main_panel and "status_bar" in main_panel.ids:
-            main_panel.ids.status_bar.text = "[b]Paso 3:[/b] Parámetros de Tráfico"
-
-    def go_back(self, w):
-        app = App.get_running_app()
-        self.manager.switch_to(app.second_window, direction="right")
-
-    def go_next(self, w):
-        app = App.get_running_app()
-        self.manager.switch_to(app.fourth_window, direction="left")
+class ThirdWindow(BaseScreen):
+    """Pantalla 3: Parámetros de Tráfico"""
+    title = "Paso 3: Parámetros de Tráfico"
+    show_back = True
+    show_next = True
 
 
-class FourthWindow(Screen):
-    """Pantalla 4"""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.add_widget(MainPanel())
-
-        button_back = Button(
-            text="BACK",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0, "y": 0},
-            background_color=(1, 0.5, 0.2, 1),
-        )
-        button_back.bind(on_release=self.go_back)
-        self.add_widget(button_back)
-
-        button_next = Button(
-            text="NEXT",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0.875, "y": 0},
-            background_color=(0.2, 0.6, 1, 1),
-        )
-        button_next.bind(on_release=self.go_next)
-        self.add_widget(button_next)
-
-    def on_enter(self, *args):
-        main_panel = None
-        for widget in self.children:
-            if isinstance(widget, MainPanel):
-                main_panel = widget
-                break
-
-        if main_panel and "status_bar" in main_panel.ids:
-            # Puedes cambiar este texto por el que corresponda
-            main_panel.ids.status_bar.text = "[b]Paso 4:[/b] Simulación"
-
-    def go_back(self, w):
-        app = App.get_running_app()
-        self.manager.switch_to(app.third_window, direction="right")
-
-    def go_next(self, w):
-        app = App.get_running_app()
-        self.manager.switch_to(app.fifth_window, direction="left")
+class FourthWindow(BaseScreen):
+    """Pantalla 4: Simulación"""
+    title = "Paso 4: Simulación"
+    show_back = True
+    show_next = True
 
 
-class FifthWindow(Screen):
-    """Pantalla 5: Solo BACK"""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.add_widget(MainPanel())
-
-        # ✅ MODIFICADO: Eliminado todo el bloque de self.summary_label
-        # --- Fin del resumen ---
-
-        button_back = Button(
-            text="BACK",
-            size_hint=(None, None),
-            size=(100, 100),
-            pos_hint={"x": 0, "y": 0},
-            background_color=(1, 0.5, 0.2, 1),
-        )
-        button_back.bind(on_release=self.go_back)
-        self.add_widget(button_back)
-
-    def on_enter(self, *args):
-        main_panel = None
-        for widget in self.children:
-            if isinstance(widget, MainPanel):
-                main_panel = widget
-                break
-
-        if main_panel and "status_bar" in main_panel.ids:
-            # Puedes cambiar este texto por el que corresponda
-            main_panel.ids.status_bar.text = "[b]Paso 5:[/b] Resultados Finales"
-
-    def go_back(self, w):
-        app = App.get_running_app()
-        self.manager.switch_to(app.fourth_window, direction="right")
+class FifthWindow(BaseScreen):
+    """Pantalla 5: Resultados Finales"""
+    title = "Paso 5: Resultados Finales"
+    show_back = True
+    show_next = False

@@ -10,7 +10,10 @@ from gui.screens import (
 )
 
 # Cargar el archivo KV externo
-Builder.load_file("kivy/layout.kv")
+try:
+    Builder.load_file("kivy/layout.kv")
+except:
+    pass  # Si no existe, continuar sin él
 
 
 class MainApp(App):
