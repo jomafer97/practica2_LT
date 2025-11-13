@@ -2,24 +2,29 @@
     allow_stretch: True
     keep_ratio: True
 
+
 <MainPanel>:
     orientation: 'vertical'
     padding: 10
     spacing: 10
+
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
         size_hint_y: 0.4
+
         ImageButton:
             id: softphone_origen
             name: 'softphone_origen'
             on_press: root.handle_button_press(self.name)
             source: 'assets/softphone.png'
+
         ImageButton:
             id: red_transporte
             name: 'red_transporte'
             on_press: root.handle_button_press(self.name)
             source: 'assets/network.png'
+
         ImageButton:
             id: softphone_destino
             name: 'softphone_destino'
@@ -31,6 +36,7 @@
         do_scroll_x: False
         do_scroll_y: True
         bar_width: '8dp'
+
         GridLayout:
             cols: 1
             size_hint_y: None
@@ -52,27 +58,32 @@
                         size: self.size
 
     Button:
-        text: 'Enviar Datos'
+        text: 'Enviar Datos (Paso 1)'
         size_hint_y: 0.1
         font_size: '18sp'
         background_color: (0.2, 0.8, 0.2, 1)
         on_press: root.send_data()
 
+
 <ConfigPopup>:
     title: root.title_text
     size_hint: (0.9, 0.9)
+
     BoxLayout:
         orientation: 'vertical'
         padding: 10
         spacing: 10
+
         ScrollView:
             id: scroll_content
             size_hint_y: 0.85
+
         Button:
             text: 'Guardar y Cerrar'
             size_hint_y: 0.15
             font_size: '16sp'
             on_press: root.dismiss()
+
 
 <GridForm>:
     cols: 2
@@ -82,28 +93,34 @@
     row_default_height: 40
     row_force_default: True
 
+
+# --- PANEL 2 (Existente) ---
+
 <Step2Panel>:
     orientation: 'vertical'
     padding: 10
     spacing: 10
-    
+
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
         size_hint_y: 0.35
+
         ImageButton:
             id: softphone_origen
             source: 'assets/softphone.png'
+
         ImageButton:
             id: red_transporte
             source: 'assets/network.png'
+
         ImageButton:
             id: softphone_destino
             source: 'assets/softphone.png'
             on_press: root.handle_button_press('softphone_destino')
 
     Button:
-        text: 'PARÁMETROS GLOBALES'
+        text: 'PARÁMETROS GLOBALES (GoS)'
         size_hint_y: 0.1
         font_size: '16sp'
         background_color: (0.6, 0.2, 0.8, 1)
@@ -111,9 +128,7 @@
 
     ScrollView:
         size_hint_y: 0.4
-        do_scroll_x: False
-        do_scroll_y: True
-        bar_width: '8dp'
+
         GridLayout:
             cols: 1
             size_hint_y: None
@@ -135,8 +150,191 @@
                         size: self.size
 
     Button:
-        text: 'Enviar Paso 2'
+        text: 'Enviar Datos (Paso 2 - ERLANG)'
         size_hint_y: 0.15
         font_size: '16sp'
         background_color: (0.2, 0.8, 0.2, 1)
         on_press: root.send_global_data()
+
+
+# --- PANEL 3 (Nuevo) ---
+
+<Step3Panel>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: 0.35
+
+        ImageButton:
+            source: 'assets/softphone.png'
+
+        ImageButton:
+            source: 'assets/network.png'
+
+        ImageButton:
+            id: softphone_destino
+            source: 'assets/softphone.png'
+            on_press: root.handle_button_press('softphone_destino')
+
+    Button:
+        text: 'PARÁMETROS TRÁFICO (BW)'
+        size_hint_y: 0.1
+        font_size: '16sp'
+        background_color: (0.6, 0.2, 0.8, 1)
+        on_press: root.open_config_popup()
+
+    ScrollView:
+        size_hint_y: 0.4
+
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            padding: 4
+
+            Label:
+                id: panel_resultados
+                text: 'Parámetros para calcular BW se mostrarán aquí.'
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                markup: True
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+    Button:
+        text: 'Enviar Datos (Paso 3 - BW)'
+        size_hint_y: 0.15
+        font_size: '16sp'
+        background_color: (0.2, 0.8, 0.2, 1)
+        on_press: root.send_traffic_data()
+
+
+# --- PANEL 4 (Nuevo) ---
+
+<Step4Panel>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: 0.35
+
+        ImageButton:
+            source: 'assets/softphone.png'
+
+        ImageButton:
+            source: 'assets/network.png'
+
+        ImageButton:
+            id: softphone_destino
+            source: 'assets/softphone.png'
+            on_press: root.handle_button_press('softphone_destino')
+
+    Button:
+        text: 'PARÁMETROS COSTES'
+        size_hint_y: 0.1
+        font_size: '16sp'
+        background_color: (0.6, 0.2, 0.8, 1)
+        on_press: root.open_config_popup()
+
+    ScrollView:
+        size_hint_y: 0.4
+
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            padding: 4
+
+            Label:
+                id: panel_resultados
+                text: 'Parámetros para calcular Costes se mostrarán aquí.'
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                markup: True
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+    Button:
+        text: 'Enviar Datos (Paso 4 - COST)'
+        size_hint_y: 0.15
+        font_size: '16sp'
+        background_color: (0.2, 0.8, 0.2, 1)
+        on_press: root.send_cost_data()
+
+
+# --- PANEL 5 (Nuevo) ---
+
+<Step5Panel>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: 0.35
+
+        ImageButton:
+            source: 'assets/softphone.png'
+
+        ImageButton:
+            source: 'assets/network.png'
+
+        ImageButton:
+            id: softphone_destino
+            source: 'assets/softphone.png'
+            on_press: root.handle_button_press('softphone_destino')
+
+    Button:
+        text: 'PARÁMETROS PLR'
+        size_hint_y: 0.1
+        font_size: '16sp'
+        background_color: (0.6, 0.2, 0.8, 1)
+        on_press: root.open_config_popup()
+
+    ScrollView:
+        size_hint_y: 0.4
+
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            padding: 4
+
+            Label:
+                id: panel_resultados
+                text: 'Parámetros para calcular PLR se mostrarán aquí.'
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                markup: True
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+    Button:
+        text: 'Enviar Datos (Paso 5 - PLR)'
+        size_hint_y: 0.15
+        font_size: '16sp'
+        background_color: (0.2, 0.8, 0.2, 1)
+        on_press: root.send_plr_data()
