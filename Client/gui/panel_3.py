@@ -12,8 +12,6 @@ if project_root not in sys.path:
 
 from .message_sender import MessageSender
 
-# Configuración de campos para Parámetros de Tráfico (Paso 3)
-# MODIFICADO: Alineado con BW_REQUEST (codec y totalCalls se obtienen de pasos 1 y 2)
 TRAFFIC_PARAMS_FIELDS = [
     (
         "Encapsulación L2:",
@@ -110,12 +108,10 @@ class Step3Panel(BoxLayout):
         try:
             bw_data = response if isinstance(response, dict) else {}
 
-            # Guardar resultados en la app
             app = App.get_running_app()
-            # Guardar la respuesta COMPLETA, ya que el Paso 4 la necesita.
             app.bw_results_data = bw_data
 
-            MessageSender._show_popup_success("BW_REQUEST", {}, response)
+            self.show_bw_results()
         except Exception as e:
             self._show_error_popup(f"Error procesando respuesta BW: {str(e)}")
 

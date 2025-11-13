@@ -12,8 +12,6 @@ if project_root not in sys.path:
 
 from .message_sender import MessageSender
 
-# Configuración de campos para Simulación de Costes (Paso 4)
-# MODIFICADO: Alineado con COST_REQUEST (BWst y callBW se obtienen del paso 3)
 COST_PARAMS_FIELDS = [
     ("Presupuesto Máximo (Pmax €):", "float", "1000.0", "Pmax"),
 ]
@@ -98,7 +96,7 @@ class Step4Panel(BoxLayout):
             # Guardar la respuesta COMPLETA
             app.cost_results_data = cost_data
 
-            MessageSender._show_popup_success("COST_REQUEST", {}, response)
+            self.show_cost_results()
         except Exception as e:
             self._show_error_popup(f"Error procesando respuesta COST: {str(e)}")
 
