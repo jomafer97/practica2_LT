@@ -59,20 +59,24 @@ message, address = client.recv_message(1024)
 print(message)
 
 callBW = {
-    "RTP": message["compressed"]["callBW"],
-    "cRTP": message["uncompressed"]["callBW"]
+    "RTP": message["uncompressed"]["callBW"],
+    "cRTP": message["compressed"]["callBW"]
 }
 
+print(callBW)
+
 BWst = {
-    "RTP": message["compressed"]["BWst"],
-    "cRTP": message["uncompressed"]["BWst"]
+    "RTP": message["uncompressed"]["BWst"],
+    "cRTP": message["compressed"]["BWst"]
 }
+
+print(BWst)
 
 message = build_message(
     "COST_REQUEST",
     callBW=callBW,
     BWst=BWst,
-    Pmax = 2e4
+    Pmax = 28390
 )
 
 addr = ('127.0.0.1', 32006)
