@@ -30,40 +30,47 @@ class Rt_calculator_service:
             raise RuntimeError(error_msg)
 
     def task(self, message, addr):
-        codec = message["codec"]
-        jitter = message["jitter"]
-        netDelay = message["netDelay"]
+        try:
+            self.logger.info(f"{self.ID}: Message received from client {addr}:\n{message}")
 
-        if codec not in self.db:
-            self.logger.error(f"{self.ID}: Invalid codec received '{codec}'")
+            codec = message["codec"]
+            jitter = message["jitter"]
+            netDelay = message["netDelay"]
+
+            if codec not in self.db:
+                self.logger.error(f"{self.ID}: Invalid codec received '{codec}'")
+                response = build_message(
+                    "ERROR",
+                    source=self.ID,
+                    error=f"f{self.ID}:Provided codec is not registered {codec}"
+                )
+                self.serviceSocket.send_message(response, addr)
+                return
+
+            codec_data = self.db[codec]
+
+            csi = codec_data["CSI (ms)"]
+            rphy = csi*0.1
+            packet = codec_data["VPS (ms)"] - codec_data["CSI (ms)"]
+            algD = codec_data["algD (ms)"]
+            rjitter2 = 2*jitter
+            rjitter15 = 1.5*jitter
+
+            rt2 = csi + packet + algD + rjitter2 + netDelay + rphy
+            rt15 = csi + packet + algD + rjitter15 + netDelay + rphy
+
             response = build_message(
-                "ERROR",
-                source=self.ID,
-                error=f"f{self.ID}:Provided codec is not registered {codec}"
+                "RT_RESPONSE",
+                rt2jit=rt2,
+                rt1_5jit=rt15,
+                csi=csi,
+                rphy=rphy,
+                rpac=packet
             )
-            self.serviceSocket.send_message(response, addr)
-            return
 
-        codec_data = self.db[codec]
-
-        csi = codec_data["CSI (ms)"]
-        rphy = csi*0.1
-        packet = codec_data["VPS (ms)"] - codec_data["CSI (ms)"]
-        algD = codec_data["algD (ms)"]
-        rjitter2 = 2*jitter
-        rjitter15 = 1.5*jitter
-
-        rt2 = csi + packet + algD + rjitter2 + netDelay + rphy
-        rt15 = csi + packet + algD + rjitter15 + netDelay + rphy
-
-        response = build_message(
-            "RT_RESPONSE",
-            rt2jit=rt2,
-            rt1_5jit=rt15,
-            csi=csi,
-            rphy=rphy,
-            rpac=packet
-        )
+        except Exception as e:
+            self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
+            response = build_message("ERROR", source=self.ID, error=str(e))
 
         self.serviceSocket.send_message(response, addr)
 
@@ -83,7 +90,7 @@ class Rt_calculator_service:
                 thread.start()
 
             except Exception as e:
-                self.logger.error(f"{self.ID}: {str(e)}")
+                self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
                 error_msg = build_message("ERROR", source=self.ID, error=str(e))
                 self.serviceSocket.send_message(error_msg, addr)
 

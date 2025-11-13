@@ -11,6 +11,8 @@ class Cost_calculator_service:
 
     def task(self, message, addr):
         try:
+            self.logger.info(f"{self.ID}: Message received from client {addr}:\n{message}")
+
             callBW = message["callBW"]
             BWst = message["BWst"]
             Pmax = message["Pmax"]
@@ -39,19 +41,18 @@ class Cost_calculator_service:
                 cRTP=crtp
             )
 
-            self.serviceSocket.send_message(response, addr)
-
         except Exception as e:
-            self.logger.error(f"Error during cost calculation: {str(e)}")
+            self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
+            response = build_message("ERROR", source=self.ID, error=str(e))
+
+        self.serviceSocket.send_message(response, addr)
 
     def start(self):
         while True:
             message, addr = self.serviceSocket.recv_message(1024)
 
             try:
-                self.logger.info(f"{self.ID}: Petition received from client {addr}")
                 validate_message(message, "COST_REQUEST")
-                self.logger.info(message)
 
                 thread = threading.Thread(
                     target=self.task,
@@ -62,7 +63,7 @@ class Cost_calculator_service:
                 thread.start()
 
             except Exception as e:
-                self.logger.error(f"{self.ID}: {str(e)}")
+                self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
                 error_msg = build_message("ERROR", source=self.ID, error=str(e))
                 self.serviceSocket.send_message(error_msg, addr)
 
