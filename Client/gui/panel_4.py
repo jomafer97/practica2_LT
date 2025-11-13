@@ -13,10 +13,9 @@ if project_root not in sys.path:
 from .message_sender import MessageSender
 
 # Configuración de campos para Simulación de Costes (Paso 4)
+# MODIFICADO: Alineado con COST_REQUEST (BWst y callBW se obtienen del paso 3)
 COST_PARAMS_FIELDS = [
-    ("Coste por Línea ($/mes):", "float", "10.0", "Coste Línea"),
-    ("Coste por Minuto ($):", "float", "0.05", "Coste Minuto"),
-    ("Minutos Totales (mes):", "int", "10000", "Minutos Totales"),
+    ("Presupuesto Máximo (Pmax €):", "float", "1000.0", "Pmax"),
 ]
 
 
@@ -55,22 +54,39 @@ class Step4Panel(BoxLayout):
         """Envía COST_REQUEST al servidor."""
         app = App.get_running_app()
         cost_data = getattr(app, "summary_data", {}).get(self.section, {})
+        bw_results = getattr(app, "bw_results_data", {})
+
+        if not bw_results:
+            self._show_error_popup("No se han calculado los datos de BW (Paso 3).")
+            return
 
         try:
-            # Recoger datos de app.summary_data
-            # Necesitamos 'numLines' de los resultados de Erlang (Paso 2)
-            num_lines = getattr(app, "erlang_results_data", {}).get("maxLines", 0)
+            # 1. Get Pmax from this panel
+            pmax = float(cost_data.get("Pmax", 1000.0))
+
+            # 2. Extract data from BW_RESPONSE (Paso 3)
+            # Mapping: RTP -> uncompressed, cRTP -> compressed
+            uncompressed = bw_results.get("uncompressed", {})
+            compressed = bw_results.get("compressed", {})
+
+            call_bw_rtp = uncompressed.get("callBW")
+            call_bw_crtp = compressed.get("callBW")
+            bwst_rtp = uncompressed.get("BWst")
+            bwst_crtp = compressed.get("BWst")
+
+            if any(v is None for v in [call_bw_rtp, call_bw_crtp, bwst_rtp, bwst_crtp]):
+                self._show_error_popup("Datos de BW (Paso 3) incompletos.")
+                return
 
             payload = {
-                "numLines": int(num_lines),
-                "costPerLine": float(cost_data.get("Coste Línea", 10.0)),
-                "costPerMinute": float(cost_data.get("Coste Minuto", 0.05)),
-                "totalMinutes": int(cost_data.get("Minutos Totales", 10000)),
+                "callBW": {"RTP": call_bw_rtp, "cRTP": call_bw_crtp},
+                "BWst": {"RTP": bwst_rtp, "cRTP": bwst_crtp},
+                "Pmax": pmax,
             }
             MessageSender.send("COST_REQUEST", payload, callback=self._on_cost_response)
-        except (ValueError, KeyError) as e:
+        except (ValueError, KeyError, TypeError) as e:
             self._show_error_popup(
-                f"Valores inválidos o faltan datos de Erlang: {str(e)}"
+                f"Valores inválidos o faltan datos de BW (Paso 3): {str(e)}"
             )
 
     def _on_cost_response(self, response):
@@ -79,17 +95,8 @@ class Step4Panel(BoxLayout):
             cost_data = response if isinstance(response, dict) else {}
 
             app = App.get_running_app()
-            if not hasattr(app, "cost_results_data"):
-                app.cost_results_data = {}
-
-            # Asumiendo que el servidor devuelve {"totalCost": X, "costLines": Y, "costMinutes": Z}
-            app.cost_results_data["Coste Total ($)"] = cost_data.get("totalCost", "---")
-            app.cost_results_data["Coste Fijo Líneas ($)"] = cost_data.get(
-                "costLines", "---"
-            )
-            app.cost_results_data["Coste Variable Minutos ($)"] = cost_data.get(
-                "costMinutes", "---"
-            )
+            # Guardar la respuesta COMPLETA
+            app.cost_results_data = cost_data
 
             MessageSender._show_popup_success("COST_REQUEST", {}, response)
         except Exception as e:
@@ -100,19 +107,26 @@ class Step4Panel(BoxLayout):
         app = App.get_running_app()
         form = GridForm(cols=2)
 
-        results = getattr(
-            app,
-            "cost_results_data",
-            {
-                "Coste Total ($)": "---",
-                "Coste Fijo Líneas ($)": "---",
-                "Coste Variable Minutos ($)": "---",
-            },
-        )
+        results = getattr(app, "cost_results_data", {})
 
-        for key, value in results.items():
-            form.add_widget(Label(text=f"{key}:"))
-            form.add_widget(Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1))
+        # Helper to add nested data
+        def add_result(form_widget, key, value, indent=""):
+            form_widget.add_widget(Label(text=f"{indent}{key}:"))
+            if isinstance(value, dict):
+                form_widget.add_widget(Label(text=""))  # Empty cell for dict title
+                for k, v in value.items():
+                    add_result(form_widget, k, v, indent="    ")
+            else:
+                form_widget.add_widget(
+                    Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1)
+                )
+
+        if not results:
+            form.add_widget(Label(text="Resultados Costes:"))
+            form.add_widget(Label(text="---", color=(1, 1, 1, 1), size_hint_x=1))
+        else:
+            for key, value in results.items():
+                add_result(form, key, value)
 
         popup = ConfigPopup(
             title_text="Softphone (Destino) - Resultados Costes", content_widget=form

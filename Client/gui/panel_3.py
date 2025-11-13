@@ -13,11 +13,8 @@ if project_root not in sys.path:
 from .message_sender import MessageSender
 
 # Configuración de campos para Parámetros de Tráfico (Paso 3)
-# (He inventado estos campos como ejemplo para BW_REQUEST)
+# MODIFICADO: Alineado con BW_REQUEST (codec y totalCalls se obtienen de pasos 1 y 2)
 TRAFFIC_PARAMS_FIELDS = [
-    ("Tipo de Tráfico:", "spinner", "Voz", ("Voz", "Video", "Datos"), "Tipo Tráfico"),
-    ("Tasa de Paquetes (pps):", "int", "50", "Tasa Paquetes"),
-    ("Tamaño Medio Paquete (bytes):", "int", "180", "Tamaño Paquete"),
     (
         "Encapsulación L2:",
         "spinner",
@@ -25,6 +22,7 @@ TRAFFIC_PARAMS_FIELDS = [
         ("Ethernet", "Ethernet + 802.1q", "PPPoE"),
         "Encapsulación",
     ),
+    ("BW Reservado (0-1):", "float", "0.2", "BW Reservado"),
 ]
 
 
@@ -71,19 +69,41 @@ class Step3Panel(BoxLayout):
     def send_traffic_data(self):
         """Envía BW_REQUEST al servidor con los Parámetros de Tráfico."""
         app = App.get_running_app()
-        traffic_data = getattr(app, "summary_data", {}).get(self.section, {})
+        summary = getattr(app, "summary_data", {})
+        traffic_data = summary.get(self.section, {})
 
         try:
-            # Recoger datos del app.summary_data
+            # 1. Get Codec from Step 1
+            codec = summary.get("Softphone (Origen)", {}).get("Codec", "G.711")
+
+            # 2. Get totalCalls from Step 2 results
+            total_calls = getattr(app, "erlang_results_data", {}).get("maxLines", 0)
+            if total_calls == "---" or total_calls == 0:
+                self._show_error_popup(
+                    "No se han calculado las 'maxLines' del Paso 2 (Erlang)."
+                )
+                return
+
+            # 3. Process Encapsulation
+            encap_str = traffic_data.get("Encapsulación", "Ethernet")
+            pppoe = encap_str == "PPPoE"
+            vlan8021q = encap_str == "Ethernet + 802.1q"
+
+            # 4. Get Reserved BW from this panel
+            reserved_bw = float(traffic_data.get("BW Reservado", 0.2))
+
             payload = {
-                "trafficType": traffic_data.get("Tipo Tráfico", "Voz"),
-                "packetRate": int(traffic_data.get("Tasa Paquetes", 50)),
-                "packetSize": int(traffic_data.get("Tamaño Paquete", 180)),
-                "encapsulation": traffic_data.get("Encapsulación", "Ethernet"),
+                "codec": codec,
+                "pppoe": pppoe,
+                "vlan8021q": vlan8021q,
+                "reservedBW": reserved_bw,
+                "totalCalls": int(total_calls),
             }
             MessageSender.send("BW_REQUEST", payload, callback=self._on_bw_response)
-        except (ValueError, KeyError) as e:
-            self._show_error_popup(f"Valores inválidos: {str(e)}")
+        except (ValueError, KeyError, AttributeError) as e:
+            self._show_error_popup(
+                f"Valores inválidos o faltan datos de pasos anteriores: {str(e)}"
+            )
 
     def _on_bw_response(self, response):
         """Callback para procesar la respuesta BW_RESPONSE del servidor."""
@@ -92,14 +112,8 @@ class Step3Panel(BoxLayout):
 
             # Guardar resultados en la app
             app = App.get_running_app()
-            if not hasattr(app, "bw_results_data"):
-                app.bw_results_data = {}
-
-            # Asumiendo que el servidor devuelve algo como {"totalBandwidth": X, "overhead": Y}
-            app.bw_results_data["Total Bandwidth (Kbps)"] = bw_data.get(
-                "totalBandwidth", "---"
-            )
-            app.bw_results_data["Overhead (Kbps)"] = bw_data.get("overhead", "---")
+            # Guardar la respuesta COMPLETA, ya que el Paso 4 la necesita.
+            app.bw_results_data = bw_data
 
             MessageSender._show_popup_success("BW_REQUEST", {}, response)
         except Exception as e:
@@ -110,15 +124,26 @@ class Step3Panel(BoxLayout):
         app = App.get_running_app()
         form = GridForm(cols=2)
 
-        results = getattr(
-            app,
-            "bw_results_data",
-            {"Total Bandwidth (Kbps)": "---", "Overhead (Kbps)": "---"},
-        )
+        results = getattr(app, "bw_results_data", {})
 
-        for key, value in results.items():
-            form.add_widget(Label(text=f"{key}:"))
-            form.add_widget(Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1))
+        # Helper to add nested data
+        def add_result(form_widget, key, value, indent=""):
+            form_widget.add_widget(Label(text=f"{indent}{key}:"))
+            if isinstance(value, dict):
+                form_widget.add_widget(Label(text=""))  # Empty cell for dict title
+                for k, v in value.items():
+                    add_result(form_widget, k, v, indent="    ")
+            else:
+                form_widget.add_widget(
+                    Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1)
+                )
+
+        if not results:
+            form.add_widget(Label(text="Resultados BW:"))
+            form.add_widget(Label(text="---", color=(1, 1, 1, 1), size_hint_x=1))
+        else:
+            for key, value in results.items():
+                add_result(form, key, value)
 
         popup = ConfigPopup(
             title_text="Softphone (Destino) - Resultados BW", content_widget=form
@@ -148,9 +173,9 @@ class Step3Panel(BoxLayout):
             self._update_summary_display()
 
     def _get_field_name(self, label_text):
-        for *_, field_name in TRAFFIC_PARAMS_FIELDS:
-            if _[0] == label_text:  # _[0] es label_text
-                return field_name
+        for field_tuple in TRAFFIC_PARAMS_FIELDS:
+            if field_tuple[0] == label_text:
+                return field_tuple[-1]  # El último item es el field_name
         return None
 
     def _update_data(self, field_name, value):

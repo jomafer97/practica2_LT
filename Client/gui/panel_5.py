@@ -13,9 +13,9 @@ if project_root not in sys.path:
 from .message_sender import MessageSender
 
 # Configuración de campos para Simulación PLR (Paso 5)
+# MODIFICADO: Alineado con PLR_REQUEST
 PLR_PARAMS_FIELDS = [
-    ("Paquetes Enviados:", "int", "100000", "Paquetes Enviados"),
-    ("Paquetes Perdidos (Red):", "int", "50", "Paquetes Perdidos"),
+    ("Bitstream (e.g., '11101...'):", "str", "1110101001011101", "Bitstream"),
 ]
 
 
@@ -56,24 +56,15 @@ class Step5Panel(BoxLayout):
         plr_data = getattr(app, "summary_data", {}).get(self.section, {})
 
         try:
-            # Recoger datos de app.summary_data
-            # Necesitamos 'jitter' de los parámetros del Softphone (Paso 1)
-            jitter_ms = (
-                getattr(app, "summary_data", {})
-                .get("Softphone (Origen)", {})
-                .get("Jitter (ms)", 30)
-            )
+            bitstream_str = plr_data.get("Bitstream", "")
+            if not bitstream_str:
+                self._show_error_popup("El Bitstream no puede estar vacío.")
+                return
 
-            payload = {
-                "packetsSent": int(plr_data.get("Paquetes Enviados", 100000)),
-                "packetsLost": int(plr_data.get("Paquetes Perdidos", 50)),
-                "jitterMs": float(jitter_ms),  # Enviar jitter de Paso 1
-            }
+            payload = {"bitstream": bitstream_str}
             MessageSender.send("PLR_REQUEST", payload, callback=self._on_plr_response)
         except (ValueError, KeyError) as e:
-            self._show_error_popup(
-                f"Valores inválidos o faltan datos de Jitter (Paso 1): {str(e)}"
-            )
+            self._show_error_popup(f"Valores inválidos: {str(e)}")
 
     def _on_plr_response(self, response):
         """Callback para procesar la respuesta PLR_RESPONSE."""
@@ -81,15 +72,8 @@ class Step5Panel(BoxLayout):
             plr_data = response if isinstance(response, dict) else {}
 
             app = App.get_running_app()
-            if not hasattr(app, "plr_results_data"):
-                app.plr_results_data = {}
-
-            # Asumiendo que el servidor devuelve {"packetLossRate": X, "jitterDiscards": Y, "totalLoss": Z}
-            app.plr_results_data["PLR Red (%)"] = plr_data.get("packetLossRate", "---")
-            app.plr_results_data["Descartes Jitter"] = plr_data.get(
-                "jitterDiscards", "---"
-            )
-            app.plr_results_data["Pérdida Total (%)"] = plr_data.get("totalLoss", "---")
+            # Guardar la respuesta COMPLETA
+            app.plr_results_data = plr_data
 
             MessageSender._show_popup_success("PLR_REQUEST", {}, response)
         except Exception as e:
@@ -103,11 +87,7 @@ class Step5Panel(BoxLayout):
         results = getattr(
             app,
             "plr_results_data",
-            {
-                "PLR Red (%)": "---",
-                "Descartes Jitter": "---",
-                "Pérdida Total (%)": "---",
-            },
+            {"p": "---", "q": "---", "pi1": "---", "pi0": "---", "E": "---"},
         )
 
         for key, value in results.items():
@@ -128,6 +108,7 @@ class Step5Panel(BoxLayout):
             widget.input_filter = "float"
         elif input_type == "int":
             widget.input_filter = "int"
+        # No filter for 'str'
         form.add_widget(widget)
         return widget
 
