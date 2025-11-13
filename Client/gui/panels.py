@@ -32,8 +32,8 @@ class MainPanel(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # La "Red de Transporte" ahora es parte del "Softphone (Origen)"
         self.section_softphone = "Softphone (Origen)"
-        self.section_red = "Red de Transporte"
 
     def handle_button_press(self, button_name):
         """Dispatch de botones a sus métodos correspondientes."""
@@ -45,7 +45,7 @@ class MainPanel(BoxLayout):
             actions[button_name]()
 
     def open_softphone_popup(self):
-        """Abre popup para configurar Softphone Origen (QoE, Codec, Jitter)."""
+        """Abre popup para configurar Softphone Origen (QoE, Codec, Jitter, Retardo Red)."""
         form = GridForm()
 
         qoe_spinner = self._create_spinner(
@@ -56,18 +56,27 @@ class MainPanel(BoxLayout):
         )
         jitter_input = self._create_input(form, "Jitter (ms):", "", "float")
 
+        # --- CAMBIO ---
+        # Añadido "Retardo de Red" a este popup
+        net_delay_input = self._create_input(form, "Retardo de Red (ms):", "", "float")
+        # --- FIN CAMBIO ---
+
         qoe_spinner.bind(text=lambda s, t: self._update_codec_options(t, codec_spinner))
 
+        # --- CAMBIO ---
+        # Añadido binding para el nuevo campo
         for widget, field in [
             (qoe_spinner, "QoE"),
             (codec_spinner, "Codec"),
             (jitter_input, "Jitter (ms)"),
+            (net_delay_input, "Retardo de Red (ms)"),  # <-- AÑADIDO
         ]:
             widget.bind(
                 text=lambda i, v, f=field: self._update_field(
                     self.section_softphone, f, v
                 )
             )
+        # --- FIN CAMBIO ---
 
         popup = ConfigPopup(
             title_text="Configuración Softphone (Origen)", content_widget=form
@@ -75,12 +84,16 @@ class MainPanel(BoxLayout):
         popup.open()
 
         # Inicializar datos
+        # --- CAMBIO ---
+        # Añadida inicialización para el nuevo campo
         for widget, field in [
             (qoe_spinner, "QoE"),
             (codec_spinner, "Codec"),
             (jitter_input, "Jitter (ms)"),
+            (net_delay_input, "Retardo de Red (ms)"),  # <-- AÑADIDO
         ]:
             self._update_field(self.section_softphone, field, widget.text)
+        # --- FIN CAMBIO ---
 
     def open_destino_popup(self):
         """Abre popup mostrando resultados de RT_RESPONSE (resultados calculados)."""
@@ -120,9 +133,13 @@ class MainPanel(BoxLayout):
                     summary.get(self.section_softphone, {}).get("Jitter (ms)", 30)
                 ),
                 "netDelay": float(
-                    summary.get(self.section_red, {}).get("Retardo Red", 0)
+                    summary.get(self.section_softphone, {}).get(
+                        "Retardo de Red (ms)", 0
+                    )
                 ),
             }
+            # --- FIN CAMBIO ---
+
             MessageSender.send(
                 "RT_REQUEST", payload, callback=self._on_response_received
             )
@@ -131,7 +148,7 @@ class MainPanel(BoxLayout):
             form = GridForm()
             form.add_widget(
                 Label(
-                    text=f"Error: {str(e)}. Asegúrate de que 'Jitter' y 'Retardo Red' tienen valores numéricos."
+                    text=f"Error: {str(e)}. Asegúrate de que 'Jitter' y 'Retardo de Red' tienen valores numéricos."
                 )
             )
             popup = ConfigPopup(title_text="Error de Envío", content_widget=form)
@@ -184,11 +201,12 @@ class MainPanel(BoxLayout):
         summary = getattr(app, "summary_data", {})
 
         summary_str = "RESUMEN - PASO 1:\n"
-        for section in [self.section_softphone, self.section_red]:
-            if section in summary and summary[section]:
-                summary_str += f"\n{section}:\n"
-                for field, value in summary[section].items():
-                    summary_str += f"   • {field}: {value}\n"
+
+        section = self.section_softphone
+        if section in summary and summary[section]:
+            summary_str += f"\n{section}:\n"
+            for field, value in summary[section].items():
+                summary_str += f"   • {field}: {value}\n"
 
         if hasattr(self, "ids") and "panel_resultados" in self.ids:
             self.ids.panel_resultados.text = summary_str
