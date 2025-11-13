@@ -10,6 +10,29 @@
 
     BoxLayout:
         orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10 # Espacio entre la imagen y el texto
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1) 
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30 
+
+        Label:
+            text: "Selección Parámetros QoE y QoS"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None 
+
+    BoxLayout:
+        orientation: 'horizontal'
         spacing: 10
         size_hint_y: 0.4
 
@@ -100,6 +123,29 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10 # Espacio entre la imagen y el texto
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1) 
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30 
+
+        Label:
+            text: "Selección Parámetros GoS"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None 
 
     BoxLayout:
         orientation: 'horizontal'
@@ -163,6 +209,28 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Selección de parámetros para el Ancho de Banda"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
 
     BoxLayout:
         orientation: 'horizontal'
@@ -224,6 +292,28 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Selección de parámetros para los Costes"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
 
     BoxLayout:
         orientation: 'horizontal'
@@ -285,6 +375,28 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Cálculo de PLR"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
 
     BoxLayout:
         orientation: 'horizontal'
