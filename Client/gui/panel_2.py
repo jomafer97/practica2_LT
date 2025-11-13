@@ -63,13 +63,9 @@ class Step2Panel(BoxLayout):
             avg_duration = float(global_data.get("T. Medio Llamada", 0))
             blocking_prob = float(global_data.get("Prob. Bloqueo", 0.01))
 
-            # Calcular número de líneas (Nc × Nl) y número de llamadas
-            num_lines = num_companies * lines_per_client
-            num_calls = num_lines  # Asumimos que cada línea puede hacer una llamada
-
             payload = {
-                "numLines": num_lines,
-                "numCalls": num_calls,
+                "numLines": num_companies,
+                "numCalls": lines_per_client,
                 "avgDuration": avg_duration,
                 "blockingPercentage": blocking_prob,
             }
