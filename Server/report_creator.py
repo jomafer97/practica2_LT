@@ -18,9 +18,8 @@ class Report_creator_service:
         while True:
             message, addr = self.serviceSocket.recv_message(1024)
 
-            if validate_message(message, "REPORT_REQUEST"):
-                self.logger.info(f"{self.ID}: Valid message received")
-                self.logger.info(message)
+            try:
+                validate_message(message, "REPORT_REQUEST")
 
                 thread = threading.Thread(
                     target=self.task,
@@ -29,9 +28,11 @@ class Report_creator_service:
                 )
 
                 thread.start()
-            else:
-                self.logger.error(f"{self.ID}: Wrong message received")
-                pass
+
+            except Exception as e:
+                self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
+                error_msg = build_message("ERROR", source=self.ID, error=str(e))
+                self.serviceSocket.send_message(error_msg, addr)
 
     def close(self):
         self.serviceSocket.close()

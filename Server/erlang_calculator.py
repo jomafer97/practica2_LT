@@ -25,30 +25,35 @@ class Erlang_calculator_service:
 
 
     def task(self, message, addr):
-        numLines = message ["numLines"]
-        numCalls= message["numCalls"]
-        avgDuration = message["avgDuration"]
-        blockingPercentage = message["blockingPercentage"]
-        self.logger.info("ERLANG CALCULATOR: Succesfully called")
+        try:
+            self.logger.info(f"{self.ID}: Message received from client {addr}:\n{message}")
 
-        A = (numLines*numCalls*avgDuration)/3600
-        maxLines = self.needed_lines(A, blockingPercentage)
+            numLines = message ["numLines"]
+            numCalls= message["numCalls"]
+            avgDuration = message["avgDuration"]
+            blockingPercentage = message["blockingPercentage"]
 
-        result = build_message(
-            "ERLANG_RESPONSE",
-            Erlangs=A,
-            maxLines= maxLines
-        )
+            A = (numLines*numCalls*avgDuration)/3600
+            maxLines = self.needed_lines(A, blockingPercentage)
 
-        self.serviceSocket.send_message(result, addr)
+            response = build_message(
+                "ERLANG_RESPONSE",
+                Erlangs=A,
+                maxLines= maxLines
+            )
+
+        except Exception as e:
+            self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
+            response = build_message("ERROR", source=self.ID, error=str(e))
+
+        self.serviceSocket.send_message(response, addr)
 
     def start(self):
         while True:
             message, addr = self.serviceSocket.recv_message(1024)
 
-            if validate_message(message, "ERLANG_REQUEST"):
-                self.logger.info(f"{self.ID}: Valid message received")
-                self.logger.info(message)
+            try:
+                validate_message(message, "ERLANG_REQUEST")
 
                 thread = threading.Thread(
                     target=self.task,
@@ -57,9 +62,11 @@ class Erlang_calculator_service:
                 )
 
                 thread.start()
-            else:
-                self.logger.info(f"{self.ID}: Wrong message received")
-                pass
+
+            except Exception as e:
+                self.logger.error(f"{self.ID}: from client {addr}, {str(e)}")
+                error_msg = build_message("ERROR", source=self.ID, error=str(e))
+                self.serviceSocket.send_message(error_msg, addr)
 
     def close(self):
         self.serviceSocket.close()

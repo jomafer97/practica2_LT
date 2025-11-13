@@ -36,48 +36,52 @@ message, address = client.recv_message(1024)
 
 print(message)
 
-# message = build_message(
-#     "BW_REQUEST",
-#     codec="G.711",
-#     pppoe=False,
-#     vlan8021q=False,
-#     reservedBW=0.3,
-#     totalCalls=150 * 20,
-# )
+message = build_message(
+    "BW_REQUEST",
+    codec="G.711",
+    pppoe=False,
+    vlan8021q=False,
+    reservedBW=0.3,
+    totalCalls=150 * 20,
+)
 
-# addr = ("127.0.0.1", 32005)
+addr = ("127.0.0.1", 32005)
 
-# client.send_message(message, addr)
+client.send_message(message, addr)
 
-# message, address = client.recv_message(1024)
+message, address = client.recv_message(1024)
 
-# print(message)
+print(message)
 
-# callBW = {
-#     "RTP": message["compressed"]["callBW"],
-#     "cRTP": message["uncompressed"]["callBW"],
-# }
+callBW = {
+    "RTP": message["uncompressed"]["callBW"],
+    "cRTP": message["compressed"]["callBW"],
+}
 
-# BWst = {"RTP": message["compressed"]["BWst"], "cRTP": message["uncompressed"]["BWst"]}
+print(callBW)
 
-# message = build_message("COST_REQUEST", callBW=callBW, BWst=BWst, Pmax=2e4)
+BWst = {"RTP": message["uncompressed"]["BWst"], "cRTP": message["compressed"]["BWst"]}
 
-# addr = ("127.0.0.1", 32006)
+print(BWst)
 
-# client.send_message(message, addr)
+message = build_message("COST_REQUEST", callBW=callBW, BWst=BWst, Pmax=28390)
 
-# message, address = client.recv_message(1024)
+addr = ("127.0.0.1", 32006)
 
-# print(message)
+client.send_message(message, addr)
 
-# message = build_message(
-#     "PLR_REQUEST", bitstream="000001111110001101100000010000000111010111111110000110000"
-# )
+message, address = client.recv_message(1024)
 
-# addr = ("127.0.0.1", 32007)
+print(message)
 
-# client.send_message(message, addr)
+message = build_message(
+    "PLR_REQUEST", bitstream="000001111110001101100000010000000111010111111110000110000"
+)
 
-# message, address = client.recv_message(1024)
+addr = ("127.0.0.1", 32007)
 
-# print(message)
+client.send_message(message, addr)
+
+message, address = client.recv_message(1024)
+
+print(message)
