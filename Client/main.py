@@ -9,11 +9,10 @@ from gui.screens import (
     FifthWindow,
 )
 
-# Cargar el archivo KV externo
 try:
     Builder.load_file("kivy/layout.kv")
 except:
-    pass  # Si no existe, continuar sin él
+    pass
 
 
 class MainApp(App):
