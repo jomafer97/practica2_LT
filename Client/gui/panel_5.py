@@ -12,8 +12,6 @@ if project_root not in sys.path:
 
 from .message_sender import MessageSender
 
-# Configuración de campos para Simulación PLR (Paso 5)
-# MODIFICADO: Alineado con PLR_REQUEST
 PLR_PARAMS_FIELDS = [
     ("Bitstream (e.g., '11101...'):", "str", "1110101001011101", "Bitstream"),
 ]
@@ -75,7 +73,7 @@ class Step5Panel(BoxLayout):
             # Guardar la respuesta COMPLETA
             app.plr_results_data = plr_data
 
-            MessageSender._show_popup_success("PLR_REQUEST", {}, response)
+            self.show_plr_results()
         except Exception as e:
             self._show_error_popup(f"Error procesando respuesta PLR: {str(e)}")
 

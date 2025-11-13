@@ -11,13 +11,9 @@ from kivy.uix.button import Button
 from kivy.app import App
 from .panels import MainPanel
 from .panel_2 import Step2Panel
-
-# --- NUEVAS IMPORTACIONES ---
 from .panel_3 import Step3Panel
 from .panel_4 import Step4Panel
 from .panel_5 import Step5Panel
-
-# --- FIN NUEVAS IMPORTACIONES ---
 
 
 class BaseScreen(Screen):
@@ -27,27 +23,24 @@ class BaseScreen(Screen):
     show_back = False
     show_next = True
 
-    # El panel por defecto es MainPanel, pero las clases hijas lo sobreescribirán
     panel_class = MainPanel
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation="vertical")
 
-        # Panel principal (usa self.panel_class)
         self.panel = self.panel_class()
         layout.add_widget(self.panel)
 
-        # Botones de navegación
         button_layout = BoxLayout(size_hint_y=0.15, spacing=10, padding=5)
 
         if self.show_back:
-            back_btn = Button(text="◄ BACK", background_color=(1, 0.5, 0.2, 1))
+            back_btn = Button(text="ANTERIOR", background_color=(1, 0.5, 0.2, 1))
             back_btn.bind(on_press=self._go_back)
             button_layout.add_widget(back_btn)
 
         if self.show_next:
-            next_btn = Button(text="NEXT ►", background_color=(0.2, 0.6, 1, 1))
+            next_btn = Button(text="SIGUIENTE", background_color=(0.2, 0.6, 1, 1))
             next_btn.bind(on_press=self._go_next)
             button_layout.add_widget(next_btn)
 
@@ -56,8 +49,7 @@ class BaseScreen(Screen):
 
     def on_enter(self):
         """Actualiza el título (si el panel tiene status_bar)."""
-        # Nota: Tus paneles no parecen tener 'status_bar',
-        # pero mantengo la lógica por si la añades en el KV.
+
         if hasattr(self.panel, "ids") and "status_bar" in self.panel.ids:
             self.panel.ids.status_bar.text = f"[b]{self.title}[/b]"
 

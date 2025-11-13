@@ -54,9 +54,7 @@ class MessageSender:
             # Ejecutar callback si se proporciona
             if callback:
                 callback(answer)
-                # Si hay callback, no mostrar popup de éxito (el callback se encarga)
             else:
-                # Solo mostrar popup si NO hay callback
                 MessageSender._show_popup_success(msg_type, payload_data, answer)
         except Exception as e:
             MessageSender._show_popup_error(f"No se pudo enviar {msg_type}: {e}")
