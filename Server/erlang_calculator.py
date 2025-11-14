@@ -29,7 +29,7 @@ class Erlang_calculator_service:
             self.logger.info(f"{self.ID}: Message received from client {addr}:\n{message}")
 
             numLines = message ["numLines"]
-            numCalls= message["numCalls"]
+            numCalls = message["numCalls"]
             avgDuration = message["avgDuration"]
             blockingPercentage = message["blockingPercentage"]
 

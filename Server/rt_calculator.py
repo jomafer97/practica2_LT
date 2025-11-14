@@ -4,8 +4,8 @@ import threading
 import json
 
 class Rt_calculator_service:
-    def __init__(self, logger):
-        self.serviceSocket = ServerSocket('127.0.0.1', 32003)
+    def __init__(self, IP, logger):
+        self.serviceSocket = ServerSocket(IP, 32003)
         self.logger = logger
         self.ID = "RT_CALCULATOR"
         self.db = self._load_database('codec_db.json')

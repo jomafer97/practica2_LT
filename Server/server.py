@@ -9,6 +9,9 @@ from erlang_calculator import Erlang_calculator_service
 from bw_calculator import BW_calculator_service
 from cost_calculator import Cost_calculator_service
 from plr_calculator import PLR_calculator_service
+
+IP = '127.0.0.1'
+
 class Server:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -21,12 +24,13 @@ class Server:
         self.logger.addHandler(self.file_handler)
 
         self.services = [
-            Rt_calculator_service(self.logger),
-            Erlang_calculator_service(self.logger),
-            Cost_calculator_service(self.logger),
-            BW_calculator_service(self.logger),
-            PLR_calculator_service(self.logger)
+            Rt_calculator_service(IP, self.logger),
+            Erlang_calculator_service(IP,self.logger),
+            Cost_calculator_service(IP, self.logger),
+            BW_calculator_service(IP, self.logger),
+            PLR_calculator_service(IP, self.logger)
         ]
+
         self.service_threads = []
 
     def start_services(self):
