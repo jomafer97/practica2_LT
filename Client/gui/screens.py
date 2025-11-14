@@ -14,7 +14,7 @@ from .panel_2 import Step2Panel
 from .panel_3 import Step3Panel
 from .panel_4 import Step4Panel
 from .panel_5 import Step5Panel
-
+from .panel_6 import Step6Panel
 
 class BaseScreen(Screen):
     """Clase base para todas las pantallas."""
@@ -61,6 +61,7 @@ class BaseScreen(Screen):
             app.third_window,
             app.fourth_window,
             app.fifth_window,
+            app.sixth_window,
         ]
         current_idx = screens.index(self)
         if current_idx > 0:
@@ -74,6 +75,7 @@ class BaseScreen(Screen):
             app.third_window,
             app.fourth_window,
             app.fifth_window,
+            app.sixth_window,
         ]
         current_idx = screens.index(self)
         if current_idx < len(screens) - 1:
@@ -138,9 +140,23 @@ class FifthWindow(BaseScreen):
     title = "Paso 5: Simulación PLR"
     panel_class = Step5Panel  # Usa el Panel 5
     show_back = True
+    show_next = True
+
+    def on_enter(self):
+        """Actualiza el título."""
+        super().on_enter()
+        self.panel._update_summary_display()
+
+class SixthWindow(BaseScreen):
+    """Pantalla 6: Simulación REPORT"""
+
+    title = "Paso 6: Simulación REPORT"
+    panel_class = Step6Panel 
+    show_back = True
     show_next = False
 
     def on_enter(self):
         """Actualiza el título."""
         super().on_enter()
         self.panel._update_summary_display()
+
