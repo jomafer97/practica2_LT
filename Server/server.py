@@ -9,6 +9,7 @@ from erlang_calculator import Erlang_calculator_service
 from bw_calculator import BW_calculator_service
 from cost_calculator import Cost_calculator_service
 from plr_calculator import PLR_calculator_service
+from report_creator import Report_creator_service
 
 IP = '127.0.0.1'
 
@@ -28,7 +29,8 @@ class Server:
             Erlang_calculator_service(IP,self.logger),
             Cost_calculator_service(IP, self.logger),
             BW_calculator_service(IP, self.logger),
-            PLR_calculator_service(IP, self.logger)
+            PLR_calculator_service(IP, self.logger),
+            Report_creator_service(IP, self.logger)
         ]
 
         self.service_threads = []

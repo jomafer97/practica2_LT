@@ -4,8 +4,8 @@ import threading
 
 
 class Erlang_calculator_service:
-    def __init__(self, logger):
-        self.serviceSocket = ServerSocket('127.0.0.1', 32004)
+    def __init__(self, IP, logger):
+        self.serviceSocket = ServerSocket(IP, 32004)
         self.logger = logger
         self.ID = "ERLANG_CALCULATOR"
 

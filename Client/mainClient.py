@@ -1,7 +1,7 @@
 import sys
 import os
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
@@ -10,27 +10,36 @@ from Shared.message_builder import build_message, validate_message
 
 client = ClientSocket()
 
-message = build_message("RT_REQUEST", codec="G.711", jitter=20, netDelay=200)
-addr = ("127.0.0.1", 32003)
+message = build_message(
+    "RT_REQUEST",
+    codec="G.711",
+    jitter=20,
+    netDelay=200
+)
+
+addr = ('127.0.0.1', 32003)
+
 client.send_message(message, addr)
+
 message, address = client.recv_message(1024)
-print("Respuesta RT_RESPONSE:")
+
 print(message)
-print("-" * 20)
 
 message = build_message(
     "ERLANG_REQUEST",
-    numLines=1200,
-    numCalls=12000,
-    avgDuration=3,
-    blockingPercentage=0.03,
+    numLines=120,
+    numCalls=12,
+    avgDuration=1200,
+    blockingPercentage=0.01
 )
-addr = ("127.0.0.1", 32004)
+
+addr = ('127.0.0.1', 32004)
+
 client.send_message(message, addr)
+
 message, address = client.recv_message(1024)
-print("Respuesta ERLANG_RESPONSE:")
+
 print(message)
-print("-" * 20)
 
 message = build_message(
     "BW_REQUEST",
@@ -38,103 +47,172 @@ message = build_message(
     pppoe=False,
     vlan8021q=False,
     reservedBW=0.3,
-    totalCalls=150 * 20,
+    totalCalls=150*20
 )
-addr = ("127.0.0.1", 32005)
+
+addr = ('127.0.0.1', 32005)
+
 client.send_message(message, addr)
+
 message, address = client.recv_message(1024)
-print("Respuesta BW_RESPONSE:")
+
 print(message)
-print("-" * 20)
 
 callBW = {
     "RTP": message["uncompressed"]["callBW"],
-    "cRTP": message["compressed"]["callBW"],
+    "cRTP": message["compressed"]["callBW"]
 }
-BWst = {"RTP": message["uncompressed"]["BWst"], "cRTP": message["compressed"]["BWst"]}
 
-message = build_message("COST_REQUEST", callBW=callBW, BWst=BWst, Pmax=28390)
-addr = ("127.0.0.1", 32006)
-client.send_message(message, addr)
-message, address = client.recv_message(1024)
-print("Respuesta COST_RESPONSE:")
-print(message)
-print("-" * 20)
+print(callBW)
+
+BWst = {
+    "RTP": message["uncompressed"]["BWst"],
+    "cRTP": message["compressed"]["BWst"]
+}
+
+print(BWst)
 
 message = build_message(
-    "PLR_REQUEST", bitstream="000001111110001101100000010000000111010111111110000110000"
+    "COST_REQUEST",
+    callBW=callBW,
+    BWst=BWst,
+    Pmax = 28390
 )
-addr = ("127.0.0.1", 32007)
+
+addr = ('127.0.0.1', 32006)
+
 client.send_message(message, addr)
+
 message, address = client.recv_message(1024)
-print("Respuesta PLR_RESPONSE:")
+
 print(message)
-print("-" * 20)
 
-
-email = "el_email_del_usuario@mail.com"
-rt_request = {"codec": "G.711", "jitter": 30.0, "netDelay": 10.0}
-erlang_request = {
-    "numLines": 10,
-    "numCalls": 5,
-    "avgDuration": 180.0,
-    "blockingPercentage": 0.01,
-}
-bw_request = {
-    "codec": "G.729",
-    "pppoe": True,
-    "vlan8021q": False,
-    "reservedBW": 0.2,
-    "totalCalls": 50,
-}
-cost_request = {
-    "Pmax": 100.0,
-    "callBW": {"RTP": 87200, "cRTP": 31200},
-    "BWst": {"RTP": 4.36, "cRTP": 1.56},
-}
-plr_request = {"bitstream": "101010..."}
-rt_response = {
-    "rt2jit": "45.12",
-    "rt1_5jit": "38.50",
-    "csi": "15.00",
-    "rphy": "10.00",
-    "rpac": "5.00",
-    "algD": None,
-}
-erlang_response = {"Erlangs": 1.23, "maxLines": 5}
-bw_response = {
-    "compressed": {"packetLength": 120, "callBW": 31200, "BWst": 1.56},
-    "uncompressed": {"PacketLength": 320, "callBW": 87200, "BWst": 4.36},
-    "pps": 50,
-}
-cost_response = {
-    "mbpsCost": 22.94,
-    "RTP": {"valid": True, "possibleCalls": 50},
-    "cRTP": {"valid": True, "possibleCalls": 140},
-}
-plr_response = {"p": 0.01, "q": 0.5, "pi1": 0.02, "pi0": 0.98, "E": 1.5}
-
-report_body = build_message(
-    "REPORT_REQUEST",
-    RT_REQUEST=rt_request,
-    RT_RESPONSE=rt_response,
-    ERLANG_REQUEST=erlang_request,
-    ERLANG_RESPONSE=erlang_response,
-    BW_REQUEST=bw_request,
-    BW_RESPONSE=bw_response,
-    COST_REQUEST=cost_request,
-    COST_RESPONSE=cost_response,
-    PLR_REQUEST=plr_request,
-    PLR_RESPONSE=plr_response,
+message = build_message(
+    "PLR_REQUEST",
+    bitstream="000001111110001101100000010000000111010111111110000110000"
 )
 
-final_report_message = {"email": email, **report_body}
+addr = ('127.0.0.1', 32007)
 
-addr = ("127.0.0.1", 32008)
+client.send_message(message, addr)
 
-client.send_message(final_report_message, addr)
 message, address = client.recv_message(1024)
 
-print("Respuesta del REPORT_REQUEST:")
 print(message)
-print("-" * 20)
+
+# --- PREPARACIÓN DE DATOS PARA INFORME FINAL ---
+
+rt_req_data = {
+    "codec": "G.711",
+    "jitter": 20,
+    "netDelay": 50
+}
+rt_resp_data = {
+    "rt2jit": 140.0,
+    "rt1_5jit": 115.0,
+    "csi": 10.0,
+    "rphy": 5.0,
+    "rpac": 15.0,
+    "algD": 10.0
+}
+
+erlang_req_data = {
+    "numLines": 50,
+    "numCalls": 200,
+    "avgDuration": 120,
+    "blockingPercentage": 0.02
+}
+erlang_resp_data = {
+    "Erlangs": 6.667,
+    "maxLines": 12
+}
+
+bw_req_data = {
+    "codec": "G.711",
+    "pppoe": False,
+    "vlan8021q": True,
+    "reservedBW": 0.15,
+    "totalCalls": 12
+}
+bw_resp_data = {
+    "compressed": {
+        "packetLength": 352,
+        "callBW": 31200,
+        "BWst": 0.374
+    },
+    "uncompressed": {
+        "PacketLength": 704,
+        "callBW": 87200,
+        "BWst": 1.046
+    },
+    "pps": 50
+}
+
+cost_req_data = {
+    "callBW": {
+        "RTP": 87200,
+        "cRTP": 31200
+    },
+    "BWst": {
+        "RTP": 1.046,
+        "cRTP": 0.374
+    },
+    "Pmax": 500
+}
+cost_resp_data = {
+    "mbpsCost": 478.01,
+    "RTP": {
+        "valid": True,
+        "possibleCalls": 5
+    },
+    "cRTP": {
+        "valid": True,
+        "possibleCalls": 16
+    }
+}
+
+plr_req_data = {
+    "bitstream": "11101000101011101011010101"
+}
+plr_resp_data = {
+    "p": 0.115,
+    "q": 0.342,
+    "pi1": 0.252,
+    "pi0": 0.748,
+    "E": 3.96
+}
+
+try:
+    email = "jomafer@correo.ugr.es"
+
+    mensaje_reporte_completo = build_message(
+        "REPORT_REQUEST",
+        email=email,
+        RT_REQUEST=rt_req_data,
+        RT_RESPONSE=rt_resp_data,
+        ERLANG_REQUEST=erlang_req_data,
+        ERLANG_RESPONSE=erlang_resp_data,
+        BW_REQUEST=bw_req_data,
+        BW_RESPONSE=bw_resp_data,
+        COST_REQUEST=cost_req_data,
+        COST_RESPONSE=cost_resp_data,
+        PLR_REQUEST=plr_req_data,
+        PLR_RESPONSE=plr_resp_data
+    )
+
+    addr = ('127.0.0.1', 32008)
+
+    print("Cliente: Enviando reporte completo...")
+    client.send_message(mensaje_reporte_completo, addr)
+
+    print("Cliente: Esperando confirmación del servidor...")
+    respuesta_reporte, address = client.recv_message(16384)
+
+    print("--- Respuesta del Servidor (Reporte) ---")
+    print(respuesta_reporte)
+    print("-----------------------------------------")
+
+except Exception as e:
+    print(f"Cliente: Error al construir o enviar el reporte: {e}")
+    import traceback
+    traceback.print_exc()

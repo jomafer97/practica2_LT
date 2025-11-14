@@ -4,8 +4,8 @@ import threading
 
 COST_MBPS = 100.0
 class Cost_calculator_service:
-    def __init__(self, logger):
-        self.serviceSocket = ServerSocket('127.0.0.1', 32006)
+    def __init__(self, IP, logger):
+        self.serviceSocket = ServerSocket(IP, 32006)
         self.logger = logger
         self.ID = "COST_CALCULATOR"
 

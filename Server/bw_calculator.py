@@ -4,8 +4,8 @@ import threading
 import json
 
 class BW_calculator_service:
-    def __init__(self, logger):
-        self.serviceSocket = ServerSocket('127.0.0.1', 32005)
+    def __init__(self, IP, logger):
+        self.serviceSocket = ServerSocket(IP, 32005)
         self.logger = logger
         self.ID = "BW_CALCULATOR"
         self.db = self._load_database('codec_db.json')

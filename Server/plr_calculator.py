@@ -4,8 +4,8 @@ import threading
 import math
 
 class PLR_calculator_service:
-    def __init__(self, logger):
-        self.serviceSocket = ServerSocket('127.0.0.1', 32007)
+    def __init__(self, IP, logger):
+        self.serviceSocket = ServerSocket(IP, 32007)
         self.logger = logger
         self.ID = "PLR_CALCULATOR"
 
