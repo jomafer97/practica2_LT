@@ -338,3 +338,71 @@
         font_size: '16sp'
         background_color: (0.2, 0.8, 0.2, 1)
         on_press: root.send_plr_data()
+
+# --- PANEL 6 (Envío Correo Electrónico) ---
+
+<Step6Panel>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/email.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Envio de Email"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
+
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: 0.35
+
+        ImageButton:
+            source: 'assets/email.png'
+            on_press: root.handle_button_press('configurar_email')
+
+    ScrollView:
+        size_hint_y: 0.4
+
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            padding: 4
+
+            Label:
+                id: panel_resultados
+                text: 'Parámetros para calcular PLR se mostrarán aquí.'
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                markup: True
+                canvas.before:
+                    Color:
+                        rgba: 0.1, 0.1, 0.1, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+    Button:
+        text: 'Enviar Email (Paso 6)'
+        size_hint_y: 0.15
+        font_size: '16sp'
+        background_color: (0.2, 0.8, 0.2, 1)
+        on_press: root.send_email_data()
