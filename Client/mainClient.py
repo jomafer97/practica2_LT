@@ -22,9 +22,9 @@ print(message)
 
 message = build_message(
     "ERLANG_REQUEST",
-    numLines=100,
-    numCalls=100,
-    avgDuration=1200,
+    numLines=1200,
+    numCalls=12000,
+    avgDuration=3,
     blockingPercentage=0.03,
 )
 

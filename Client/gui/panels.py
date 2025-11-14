@@ -138,7 +138,6 @@ class MainPanel(BoxLayout):
                     )
                 ),
             }
-            # --- FIN CAMBIO ---
 
             MessageSender.send(
                 "RT_REQUEST", payload, callback=self._on_response_received

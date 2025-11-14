@@ -15,6 +15,7 @@ class MessageSender:
         "BW_REQUEST": 32005,
         "COST_REQUEST": 32006,
         "PLR_REQUEST": 32007,
+        "CORREO": 32008,
     }
 
     @staticmethod
@@ -62,7 +63,7 @@ class MessageSender:
     @staticmethod
     def _show_popup_success(msg_type, payload, answer):
         form = GridForm()
-        form.add_widget(Label(text=f"✅ {msg_type} enviado correctamente."))
+        form.add_widget(Label(text=f"{msg_type} enviado correctamente."))
 
         form.add_widget(Label(text="\n--- Payload (JSON) ---\n"))
         payload_label = Label(text=json.dumps(payload, indent=2, ensure_ascii=False))
