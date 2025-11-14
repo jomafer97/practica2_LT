@@ -93,6 +93,8 @@ messages = {
 
     # REPORT REQUEST
     "REPORT_REQUEST":{
+	    "email": None,                  # (mail)
+
         # RT CALCULATION REQUEST
         "RT_REQUEST": {
             "codec": None,
@@ -182,6 +184,11 @@ messages = {
             "pi0": None,
             "E": None
         },
+    },
+
+    # REPORT RESPONSE
+    "REPORT_RESPONSE":{
+        "report": None
     },
 
     # ERROR MESSAGES

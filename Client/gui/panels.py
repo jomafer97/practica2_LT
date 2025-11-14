@@ -13,17 +13,18 @@ if project_root not in sys.path:
 from .message_sender import MessageSender
 
 CODEC_QOE_MAP = {
-    "Excelente": ("G.711", "G722_64k"),
+    "Excelente": ("G.711", "G.722"),
     "Buena": ("G.729", "G.726", "ilbc_mode_20"),
-    "Normal": ("G.723.1", "G.723.1", "G.726", "G.728", "ilbc_mode_30"),
+    "Normal": ("G.723.1", "G.726", "G.728", "ilbc_mode_30"),
 }
 
 RT_RESPONSE_MAPPING = {
-    "rt2jit": "Rt2jit (ms)",
-    "rt1_5jit": "Rt1_5jit (ms)",
+    "rt2jit": "Retardo Total (Buffer x2) (ms)",
+    "rt1_5jit": "Retardo Total (Buffer x1.5) (ms)",
     "csi": "CSI (ms)",
-    "rphy": "Rphy (ms)",
-    "rpac": "Rpaq (ms)",
+    "rphy": "Retardo Físico (ms)",
+    "rpac": "Retardo Paquetización (ms)",
+    "algD": "Retardo Algorítmico (ms)",
 }
 
 
@@ -32,7 +33,6 @@ class MainPanel(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # La "Red de Transporte" ahora es parte del "Softphone (Origen)"
         self.section_softphone = "Softphone (Origen)"
 
     def handle_button_press(self, button_name):
@@ -56,65 +56,84 @@ class MainPanel(BoxLayout):
         )
         jitter_input = self._create_input(form, "Jitter (ms):", "", "float")
 
-        # --- CAMBIO ---
-        # Añadido "Retardo de Red" a este popup
         net_delay_input = self._create_input(form, "Retardo de Red (ms):", "", "float")
-        # --- FIN CAMBIO ---
 
         qoe_spinner.bind(text=lambda s, t: self._update_codec_options(t, codec_spinner))
 
-        # --- CAMBIO ---
-        # Añadido binding para el nuevo campo
         for widget, field in [
             (qoe_spinner, "QoE"),
             (codec_spinner, "Codec"),
             (jitter_input, "Jitter (ms)"),
-            (net_delay_input, "Retardo de Red (ms)"),  # <-- AÑADIDO
+            (net_delay_input, "Retardo de Red (ms)"),
         ]:
             widget.bind(
                 text=lambda i, v, f=field: self._update_field(
                     self.section_softphone, f, v
                 )
             )
-        # --- FIN CAMBIO ---
 
         popup = ConfigPopup(
             title_text="Configuración Softphone (Origen)", content_widget=form
         )
         popup.open()
 
-        # Inicializar datos
-        # --- CAMBIO ---
-        # Añadida inicialización para el nuevo campo
         for widget, field in [
             (qoe_spinner, "QoE"),
             (codec_spinner, "Codec"),
             (jitter_input, "Jitter (ms)"),
-            (net_delay_input, "Retardo de Red (ms)"),  # <-- AÑADIDO
+            (net_delay_input, "Retardo de Red (ms)"),
         ]:
             self._update_field(self.section_softphone, field, widget.text)
-        # --- FIN CAMBIO ---
 
     def open_destino_popup(self):
         """Abre popup mostrando resultados de RT_RESPONSE (resultados calculados)."""
+
+        def get_delay_feedback(delay_value):
+            """Devuelve el mensaje y color según el valor del retardo."""
+            if delay_value is None:
+                return "Valor no calculado", (1, 1, 1, 1)  # Blanco
+            if 0 <= delay_value <= 150:
+                return "Aceptable para la mayoría de aplicaciones", (0, 1, 0, 1)  # Verde
+            elif 150 < delay_value <= 400:
+                return "Moderadamente aceptable", (1, 0.65, 0, 1)  # Naranja
+            else:  # > 400
+                return "Inaceptable", (1, 0, 0, 1)  # Rojo
+
         app = App.get_running_app()
 
         form = GridForm(cols=2)
 
-        for field_name in [
-            "Rt2jit (ms)",
-            "Rt1_5jit (ms)",
-            "CSI (ms)",
-            "Rphy (ms)",
-            "Rpaq (ms)",
-        ]:
-            form.add_widget(Label(text=f"{field_name}:"))
-            stored_value = (
-                app.destination_results_data.get(field_name, "---")
-                if hasattr(app, "destination_results_data")
-                else "---"
-            )
-            form.add_widget(Label(text=stored_value, color=(1, 1, 1, 1), size_hint_x=1))
+        results_data = getattr(app, "destination_results_data", {})
+        if results_data:
+            # 1. Mostrar todos los resultados numéricos
+            for key, field_name in RT_RESPONSE_MAPPING.items():
+                raw_value = results_data.get(key)
+                value_str = (
+                    f"{raw_value:.2f}"
+                    if isinstance(raw_value, (int, float))
+                    else "---"
+                )
+                form.add_widget(Label(text=f"{field_name}:"))
+                form.add_widget(
+                    Label(text=value_str, color=(1, 1, 1, 1), size_hint_x=1)
+                )
+
+            # 2. Añadir un separador visual
+            form.add_widget(Label(text="-" * 20))
+            form.add_widget(Label(text="-" * 20))
+
+            # 3. Añadir los comentarios de feedback al final
+            for key, name in [
+                ("rt2jit", "Retardo Total (Buffer x2)"),
+                ("rt1_5jit", "Retardo Total (Buffer x1.5)"),
+            ]:
+                feedback_text, feedback_color = get_delay_feedback(results_data.get(key))
+                form.add_widget(Label(text=f"Valoración {name}:"))
+                form.add_widget(Label(text=feedback_text, color=feedback_color))
+
+        else:
+            form.add_widget(Label(text="Resultados:"))
+            form.add_widget(Label(text="---", color=(1, 1, 1, 1), size_hint_x=1))
 
         popup = ConfigPopup(
             title_text="Softphone (Destino) - Resultados", content_widget=form
@@ -143,7 +162,6 @@ class MainPanel(BoxLayout):
                 "RT_REQUEST", payload, callback=self._on_response_received
             )
         except (ValueError, KeyError) as e:
-            # Importante: Mostrar error si los campos están vacíos/inválidos
             form = GridForm()
             form.add_widget(
                 Label(
@@ -216,15 +234,9 @@ class MainPanel(BoxLayout):
         if not hasattr(app, "destination_results_data"):
             app.destination_results_data = {}
 
+        app.destination_results_data.clear()
         if isinstance(response, dict):
-            for resp_key, field_name in RT_RESPONSE_MAPPING.items():
-                if resp_key in response:
-                    value = response[resp_key]
-                    formatted = (
-                        f"{value:.2f}"
-                        if isinstance(value, (int, float))
-                        else str(value)
-                    )
-                    app.destination_results_data[field_name] = formatted
+            # Guardamos el diccionario de respuesta completo con valores numéricos raw
+            app.destination_results_data = response
 
         self.open_destino_popup()

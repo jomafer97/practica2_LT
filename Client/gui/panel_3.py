@@ -17,7 +17,7 @@ TRAFFIC_PARAMS_FIELDS = [
         "Encapsulación L2:",
         "spinner",
         "Ethernet",
-        ("Ethernet", "Ethernet + 802.1q", "PPPoE"),
+        ("Ethernet", "Ethernet + 802.1q", "PPPoE", "PPP + 802.1q"),
         "Encapsulación",
     ),
     ("BW Reservado (0-1):", "float", "0.2", "BW Reservado"),
@@ -84,8 +84,8 @@ class Step3Panel(BoxLayout):
 
             # 3. Process Encapsulation
             encap_str = traffic_data.get("Encapsulación", "Ethernet")
-            pppoe = encap_str == "PPPoE"
-            vlan8021q = encap_str == "Ethernet + 802.1q"
+            pppoe = "PPP" in encap_str # Esto funciona para "PPPoE" y "PPP + 802.1q"
+            vlan8021q = "802.1q" in encap_str # Esto funciona para "Ethernet + 802.1q" y "PPP + 802.1q"
 
             # 4. Get Reserved BW from this panel
             reserved_bw = float(traffic_data.get("BW Reservado", 0.2))
