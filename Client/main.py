@@ -7,6 +7,7 @@ from gui.screens import (
     ThirdWindow,
     FourthWindow,
     FifthWindow,
+    SixthWindow,
 )
 
 try:
@@ -28,6 +29,8 @@ class MainApp(App):
         MainApp.third_window = ThirdWindow(name="third_window")
         MainApp.fourth_window = FourthWindow(name="fourth_window")
         MainApp.fifth_window = FifthWindow(name="fifth_window")
+        MainApp.sixth_window = SixthWindow(name="sixth_window")
+       
 
         # Añadir al ScreenManager
         screen_manager.add_widget(MainApp.main_window)
@@ -35,6 +38,7 @@ class MainApp(App):
         screen_manager.add_widget(MainApp.third_window)
         screen_manager.add_widget(MainApp.fourth_window)
         screen_manager.add_widget(MainApp.fifth_window)
+        screen_manager.add_widget(MainApp.sixth_window)
 
         return screen_manager
 
