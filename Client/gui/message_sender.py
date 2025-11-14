@@ -15,7 +15,7 @@ class MessageSender:
         "BW_REQUEST": 32005,
         "COST_REQUEST": 32006,
         "PLR_REQUEST": 32007,
-        "CORREO": 32008,
+        "REPORT_REQUEST": 32008,
     }
 
     @staticmethod

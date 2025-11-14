@@ -13,10 +13,9 @@ if project_root not in sys.path:
 from .message_sender import MessageSender
 
 EMAIL_PARAMS_FIELDS = [
-    ("Introduzca su email", "str", "correo de ejemplo", "email"), # Añadimos informacion de los campos del pop up, etiqueta, tipo de dato, valor por defecto, nombre de la clave para almacenar el dato
+    ("Introduzca su email", "str", "", "email"),  # Valor por defecto vacío
 ]
 
-# ESTE COMENTARIO ES PARA PODER HACER EL PULL REQUEST 
 
 class Step6Panel(BoxLayout):
     """Panel para Paso 6: Simulación REPORT (REPORT_REQUEST)."""
@@ -27,8 +26,8 @@ class Step6Panel(BoxLayout):
         self.padding = 10
         self.spacing = 10
         self.section = "Envio Email"
-    
-    def handle_button_press(self, button_name): 
+
+    def handle_button_press(self, button_name):
         if button_name == "configurar_email":
             self.open_config_popup()
 
@@ -41,39 +40,155 @@ class Step6Panel(BoxLayout):
             widget.bind(
                 text=lambda i, v, lt=label_text: self._on_field_change(i, v, lt)
             )
-            # Inicializar valor por defecto
-            self._on_field_change(widget, default, label_text)
+            # Inicializar valor por defecto si no existe
+            app = App.get_running_app()
+            email_data = getattr(app, "summary_data", {}).get(self.section, {})
+            current_email = email_data.get("email", default)
+            widget.text = current_email
+            self._on_field_change(widget, current_email, label_text)
 
         popup = ConfigPopup(
-            title_text=field_name, content_widget=form
+            title_text="Configurar Email para Informe", content_widget=form
         )
         popup.open()
 
     def send_email_data(self):
-        """Envía PLR_REQUEST al servidor."""
+        """
+        Recopila TODOS los datos de la app y envía el
+        gran payload 'REPORT_REQUEST'.
+        """
         app = App.get_running_app()
-        email_data = getattr(app, "summary_data", {}).get(self.section, {})
-
+        summary_data = getattr(app, "summary_data", {})
 
         try:
-            email_str = email_data.get("email", "")
-            if not email_str:
-                self._show_error_popup("El email no puede estar vacío.")
+            rt_req_raw = summary_data.get("Softphone (Origen)", {})
+            erlang_req_raw = summary_data.get("Parámetros Globales", {})
+            bw_req_raw = summary_data.get("Parámetros BW", {})
+            cost_req_raw = summary_data.get("Parámetros Coste", {})
+            plr_req_raw = summary_data.get("Parámetros PLR", {})
+            email_req_raw = summary_data.get("Envio Email", {})
+
+            rt_resp_raw = getattr(app, "destination_results_data", {})
+            erlang_resp_raw = getattr(app, "erlang_results_data", {})
+            bw_resp_raw = getattr(app, "bw_results_data", {})
+            cost_resp_raw = getattr(app, "cost_results_data", {})
+            plr_resp_raw = getattr(app, "plr_results_data", {})
+
+            payload = {
+                "email": email_req_raw.get("email"),
+                "RT_REQUEST": {
+                    "codec": rt_req_raw.get("Codec"),
+                    "jitter": (
+                        float(rt_req_raw.get("Jitter (ms)"))
+                        if rt_req_raw.get("Jitter (ms)")
+                        else None
+                    ),
+                    "netDelay": (
+                        float(rt_req_raw.get("Retardo de Red (ms)"))
+                        if rt_req_raw.get("Retardo de Red (ms)")
+                        else None
+                    ),
+                },
+                "RT_RESPONSE": {
+                    "rt2jit": rt_resp_raw.get("Rt2jit (ms)"),
+                    "rt1_5jit": rt_resp_raw.get("Rt1_5jit (ms)"),
+                    "csi": rt_resp_raw.get("CSI (ms)"),
+                    "rphy": rt_resp_raw.get("Rphy (ms)"),
+                    "rpac": rt_resp_raw.get("Rpaq (ms)"),
+                    "algD": rt_resp_raw.get(
+                        "algD"
+                    ),  # (No estaba en tu Panel 1, pero sí en tu JSON)
+                },
+                "ERLANG_REQUEST": {
+                    "numLines": (
+                        int(erlang_req_raw.get("Num. Empresas"))
+                        if erlang_req_raw.get("Num. Empresas")
+                        else None
+                    ),
+                    "numCalls": (
+                        int(erlang_req_raw.get("Líneas / Cliente"))
+                        if erlang_req_raw.get("Líneas / Cliente")
+                        else None
+                    ),
+                    "avgDuration": (
+                        float(erlang_req_raw.get("T. Medio Llamada"))
+                        if erlang_req_raw.get("T. Medio Llamada")
+                        else None
+                    ),
+                    "blockingPercentage": (
+                        float(erlang_req_raw.get("Prob. Bloqueo"))
+                        if erlang_req_raw.get("Prob. Bloqueo")
+                        else None
+                    ),
+                },
+                "ERLANG_RESPONSE": {
+                    "Erlangs": erlang_resp_raw.get("Erlangs"),
+                    "maxLines": erlang_resp_raw.get("maxLines"),
+                },
+                # --- El resto de paneles (sigue este patrón) ---
+                "BW_REQUEST": {
+                    "codec": bw_req_raw.get("Codec"),  # (Nombre de campo asumido)
+                    "pppoe": bw_req_raw.get("pppoe"),  # (Nombre de campo asumido)
+                    "vlan8021q": bw_req_raw.get(
+                        "vlan8021q"
+                    ),  # (Nombre de campo asumido)
+                    "reservedBW": (
+                        float(bw_req_raw.get("reservedBW"))
+                        if bw_req_raw.get("reservedBW")
+                        else None
+                    ),  # (Nombre de campo asumido)
+                    "totalCalls": (
+                        int(bw_req_raw.get("totalCalls"))
+                        if bw_req_raw.get("totalCalls")
+                        else None
+                    ),  # (Nombre de campo asumido)
+                },
+                "BW_RESPONSE": bw_resp_raw,  # Asumimos que la respuesta ya tiene la estructura correcta
+                "COST_REQUEST": {
+                    # (Completa con los campos de tu panel de Costes)
+                    "Pmax": (
+                        float(cost_req_raw.get("Pmax"))
+                        if cost_req_raw.get("Pmax")
+                        else None
+                    ),  # (Nombre de campo asumido)
+                    "callBW": cost_req_raw.get(
+                        "callBW"
+                    ),  # (Esto vendrá de BW_RESPONSE)
+                    "BWst": cost_req_raw.get("BWst"),  # (Esto vendrá de BW_RESPONSE)
+                },
+                "COST_RESPONSE": cost_resp_raw,  # Asumimos que la respuesta ya tiene la estructura correcta
+                "PLR_REQUEST": {
+                    "bitstream": plr_req_raw.get(
+                        "bitstream"
+                    )  # (Nombre de campo asumido)
+                },
+                "PLR_RESPONSE": plr_resp_raw,  # Asumimos que la respuesta ya tiene la estructura correcta
+            }
+
+            # --- 4. Validación de Email ---
+            if not payload["email"]:
+                self._show_error_popup(
+                    "El email no puede estar vacío. Configúralo primero."
+                )
                 return
 
-            payload = {"email": email_str}
+            # --- 5. Envío ---
+            MessageSender.send(
+                "REPORT_REQUEST", payload, callback=self._on_email_response
+            )
 
-            MessageSender.send("REPORT_REQUEST", payload, callback=self._on_email_response)
-        except (ValueError, KeyError) as e:
-            self._show_error_popup(f"Valores inválidos: {str(e)}")
+        except (ValueError, KeyError, TypeError) as e:
+            self._show_error_popup(
+                f"Error al construir el informe: {str(e)}. Faltan datos de pasos anteriores."
+            )
 
     def _on_email_response(self, response):
         """Callback para procesar la respuesta REQUEST_RESPONSE."""
         try:
-            email_data = response if isinstance(response, dict) else {}
-
+            email_data = (
+                response if isinstance(response, dict) else {"status": str(response)}
+            )
             app = App.get_running_app()
-            # Guardar la respuesta COMPLETA
             app.email_results_data = email_data
 
             self.show_email_results()
@@ -81,26 +196,23 @@ class Step6Panel(BoxLayout):
             self._show_error_popup(f"Error procesando respuesta REPORT: {str(e)}")
 
     def show_email_results(self):
-        """Muestra los resultados de PLR guardados."""
+        """Muestra un popup de éxito/fracaso del envío del informe."""
         app = App.get_running_app()
-        form = GridForm(cols=2)
+        form = GridForm(cols=1)
 
         results = getattr(
             app,
-            "plr_results_data",
-            {"p": "---", "q": "---", "pi1": "---", "pi0": "---", "E": "---"},
+            "email_results_data",
+            {"status": "Respuesta desconocida"},
         )
 
-        for key, value in results.items():
-            form.add_widget(Label(text=f"{key}:"))
-            form.add_widget(Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1))
-
-        popup = ConfigPopup(
-            title_text="Softphone (Destino) - Resultados PLR", content_widget=form
+        form.add_widget(Label(text="Informe enviado al servidor."))
+        form.add_widget(
+            Label(text=f"Respuesta del servidor: {results.get('status', str(results))}")
         )
+
+        popup = ConfigPopup(title_text="Informe Enviado", content_widget=form)
         popup.open()
-
-    # --- Métodos Helper (idénticos a paneles anteriores) ---
 
     def _create_input_field(self, form, label_text, default_value, input_type):
         form.add_widget(Label(text=label_text))
@@ -109,7 +221,6 @@ class Step6Panel(BoxLayout):
             widget.input_filter = "float"
         elif input_type == "int":
             widget.input_filter = "int"
-        # No filter for 'str'
         form.add_widget(widget)
         return widget
 
@@ -142,7 +253,7 @@ class Step6Panel(BoxLayout):
         data = getattr(app, "summary_data", {}).get(self.section, {})
 
         if not data:
-            summary_str = "Sin parámetros configurados aún."
+            summary_str = "Email no configurado."
         else:
             summary_str = f"{self.section.upper()}:\n"
             for field_name, value in data.items():
