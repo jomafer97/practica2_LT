@@ -14,6 +14,7 @@ messages = {
         "csi": None,                # (ms)
         "rphy": None,               # (ms)
         "rpac": None,               # (ms)
+        "algD": None                # (ms)
     },
 
     # TRAFFIC CALCULATION REQUEST
@@ -105,6 +106,7 @@ messages = {
             "csi": None,                # (ms)
             "rphy": None,               # (ms)
             "rpac": None,               # (ms)
+            "algD": None                # (ms)
         },
 
         # TRAFFIC CALCULATION REQUEST

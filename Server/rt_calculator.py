@@ -65,7 +65,8 @@ class Rt_calculator_service:
                 rt1_5jit=rt15,
                 csi=csi,
                 rphy=rphy,
-                rpac=packet
+                rpac=packet,
+                algD=algD
             )
 
         except Exception as e:
