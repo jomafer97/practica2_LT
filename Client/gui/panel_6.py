@@ -16,6 +16,7 @@ EMAIL_PARAMS_FIELDS = [
     ("Introduzca su email", "str", "correo de ejemplo", "email"), # Añadimos informacion de los campos del pop up, etiqueta, tipo de dato, valor por defecto, nombre de la clave para almacenar el dato
 ]
 
+# ESTE COMENTARIO ES PARA PODER HACER EL PULL REQUEST 
 
 class Step6Panel(BoxLayout):
     """Panel para Paso 5: Simulación PLR (PLR_REQUEST)."""
