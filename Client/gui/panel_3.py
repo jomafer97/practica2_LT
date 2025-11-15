@@ -111,7 +111,7 @@ class Step3Panel(BoxLayout):
             if key == "packetLength":
                 value_str = f"{value} bytes"
             elif key == "callBW":
-                value_str = f"{value:.2f} kbps"
+                value_str = f"{value:.2f} bps"
             elif key == "BWst":
                 value_str = f"{value:.3f} Mbps"
             elif key == "pps":
