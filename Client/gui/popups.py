@@ -15,3 +15,6 @@ class ConfigPopup(Popup):
         super().__init__(**kwargs)
         self.title_text = title_text
         self.ids.scroll_content.add_widget(content_widget)
+
+class InfoPopup(Popup):
+    info_text = StringProperty("Información por defecto")

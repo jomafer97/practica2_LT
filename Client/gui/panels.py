@@ -2,7 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
-from .popups import ConfigPopup, GridForm
+from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 import os, sys
 
@@ -40,9 +40,21 @@ class MainPanel(BoxLayout):
         actions = {
             "softphone_origen": self.open_softphone_popup,
             "softphone_destino": self.open_destino_popup,
+            "question_1": self.open_question1_popup,
         }
         if button_name in actions:
             actions[button_name]()
+
+    def open_question1_popup(self):
+        """ Abre popup con la información de este paso """
+        info_text_1 =("- Introducir la calidad de voz en el primer softphone según la tabla MOS de forma que aparezcan los codecs disponibles."
+                      "- Introducir Jitter y Retardo de la Red también en el primer softphone.")
+
+        popup = InfoPopup(
+            title="Información Pasos 2 y 3",
+            info_text = info_text_1
+        )
+        popup.open()
 
     def open_softphone_popup(self):
         """Abre popup para configurar Softphone Origen (QoE, Codec, Jitter, Retardo Red)."""

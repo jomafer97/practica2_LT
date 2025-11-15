@@ -1,6 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from .popups import ConfigPopup, GridForm
+from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -34,6 +34,20 @@ class Step5Panel(BoxLayout):
         self.section = "Parámetros de PLR"
         self.file_popup = None 
 
+    def handle_button_press(self, button_name):
+        if button_name == "question_5":
+            self.open_question5_popup()
+    
+    def open_question5_popup(self):
+        """ Abre popup con la información de este paso """
+        info_text_1 =("Para obtener los valores de p, q, pi1, pi0 y E será necesario introducir un fichero de texto"
+        "en formato txt")
+
+        popup = InfoPopup(
+            title="Información Paso 7",
+            info_text = info_text_1
+        )
+        popup.open()
 
     def open_config_popup(self):
         """
