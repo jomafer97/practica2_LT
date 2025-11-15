@@ -5,12 +5,32 @@ import json
 
 class Rt_calculator_service:
     def __init__(self, IP, logger):
+        """
+    Servicio de red para calcular el Retardo Total (RT) en VoIP.
+
+    Escucha peticiones en un socket. Utiliza una base de datos de códecs
+    y parámetros de red (jitter, retardo de red) proporcionados por
+    el cliente para calcular el retardo total (RT) de extremo a extremo
+    para dos escenarios de jitter buffer (1.5x y 2x Jitter).
+    """
         self.serviceSocket = ServerSocket(IP, 32003)
         self.logger = logger
         self.ID = "RT_CALCULATOR"
         self.db = self._load_database('codec_db.json')
 
     def _load_database(self, filename):
+        """
+        Carga la base de datos de códecs desde un archivo JSON.
+
+        Es un método interno utilizado durante la inicialización.
+
+        :param filename: El nombre del archivo JSON a cargar.
+        :type filename: str
+        :raises RuntimeError: Si el archivo no se encuentra (FileNotFoundError)
+                            o si el archivo contiene JSON inválido (json.JSONDecodeError).
+        :returns: Los datos de la base de datos cargados.
+        :rtype: dict
+        """
         self.logger.info(f"{self.ID}: Attempting to load database from {filename}")
 
         try:
@@ -30,6 +50,55 @@ class Rt_calculator_service:
             raise RuntimeError(error_msg)
 
     def task(self, message, addr):
+        """
+        Procesa una solicitud de cálculo de RT y envía la respuesta.
+
+        Esta función se ejecuta en un hilo. Extrae el códec, jitter
+        y retardo de red del mensaje. Busca los datos del códec en la
+        base de datos y calcula el RT para 2x Jitter y 1.5x Jitter.
+
+        Si el códec no se encuentra, envía un mensaje de ERROR al cliente.
+
+        :param message: El mensaje de solicitud (dict) que debe
+                        contener 'codec', 'jitter' y 'netDelay'.
+        :type message: dict
+        :param addr: La dirección (IP, puerto) del cliente.
+        :type addr: tuple
+
+        Ejemplo de uso:
+
+        Asumiendo datos en `self.db`:
+        `self.db["G.729"] = {"CSI (ms)": 10, "VPS (ms)": 30, "algD (ms)": 5}`
+
+        Un **mensaje de entrada (message)** tendría esta estructura:
+        ```json
+        {
+            "codec": "G.729",
+            "jitter": 20,
+            "netDelay": 50
+        }
+        ```
+
+        **Cálculo (simplificado):**
+        - `csi` = 10, `rphy` = 1, `packet` = 20, `algD` = 5
+        - `rjitter2` = 40, `rjitter15` = 30, `netDelay` = 50
+        - `rt2` = 10 + 20 + 5 + 40 + 50 + 1 = 126
+        - `rt15` = 10 + 20 + 5 + 30 + 50 + 1 = 116
+
+        El **mensaje de respuesta** generado sería:
+        ```json
+        {
+            "type": "RT_RESPONSE",
+            "payload": {
+                "rt2jit": 126.0,
+                "rt1_5jit": 116.0,
+                "csi": 10,
+                "rphy": 1.0,
+                "rpac": 20
+            }
+        }
+        ```
+        """
         try:
             self.logger.info(f"{self.ID}: Message received from client {addr}:\n{message}")
 
@@ -76,6 +145,14 @@ class Rt_calculator_service:
         self.serviceSocket.send_message(response, addr)
 
     def start(self):
+        """
+        Inicia el bucle principal del servidor para escuchar solicitudes.
+
+        Espera mensajes. Si recibe un 'RT_REQUEST' válido
+        (validado por 'validate_message'), inicia un nuevo hilo
+        para procesar la tarea ('self.task'). Si la validación falla,
+        captura la excepción y envía un mensaje de error al cliente.
+        """
         while True:
             message, addr = self.serviceSocket.recv_message(1024)
 
@@ -96,5 +173,8 @@ class Rt_calculator_service:
                 self.serviceSocket.send_message(error_msg, addr)
 
     def close(self):
+        """
+        Cierra el socket del servidor.
+        """
         self.serviceSocket.close()
 
