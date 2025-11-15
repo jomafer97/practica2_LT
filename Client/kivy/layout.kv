@@ -10,6 +10,39 @@
 
     BoxLayout:
         orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Envio de parámetros de calidad de servicio (QoS)"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
+        
+        ImageButton:
+            id: question_1
+            name: 'question_1'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/question.png'
+            size_hint_x: None
+            width: 25
+        
+
+
+    BoxLayout:
+        orientation: 'horizontal'
         spacing: 10
         size_hint_y: 0.4
 
@@ -64,6 +97,29 @@
         background_color: (0.2, 0.8, 0.2, 1)
         on_press: root.send_data()
 
+<InfoPopup>:
+    size_hint: (0.9, 0.9) 
+    title: "Información"
+    auto_dismiss: False
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            id: info_label
+            text: root.info_text 
+            text_size: self.width, None
+            valign: 'top'
+            size_hint_y: 1
+            height: self.texture_size[1]
+
+        Button:
+            text: 'Cerrar'
+            on_release: root.dismiss()
+            size_hint_y: None
+            height: '48dp' 
 
 <ConfigPopup>:
     title: root.title_text
@@ -100,6 +156,36 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Envio de parámetros globales (GoS)"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
+        ImageButton:
+            id: question_2
+            name: 'question_2'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/question.png'
+            size_hint_x: None
+            width: 25
+
 
     BoxLayout:
         orientation: 'horizontal'
@@ -163,6 +249,35 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Envio de parámetros de tráfico (BW)"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
+        ImageButton:
+            id: question_3
+            name: 'question_3'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/question.png'
+            size_hint_x: None
+            width: 25
 
     BoxLayout:
         orientation: 'horizontal'
@@ -224,6 +339,35 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/softphone.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Envio de parámetros para los costes"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
+        ImageButton:
+            id: question_4
+            name: 'question_4'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/question.png'
+            size_hint_x: None
+            width: 25
 
     BoxLayout:
         orientation: 'horizontal'
@@ -285,7 +429,37 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
-    
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: 30
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.15, 0.15, 0.15, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Image:
+            source: 'assets/archivo.png' 
+            size_hint_x: None
+            width: 30
+
+        Label:
+            text: "Envío de archivo para el cálculo de PLR"
+            font_size: '16sp'
+            color: (0.9, 0.9, 0.9, 1)
+            text_size: self.width, None
+        ImageButton:
+            id: question_5
+            name: 'question_5'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/question.png'
+            size_hint_x: None
+            width: 25
+
+
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
@@ -354,6 +528,13 @@
             font_size: '16sp'
             color: (0.9, 0.9, 0.9, 1)
             text_size: self.width, None
+        ImageButton:
+            id: question_6
+            name: 'question_6'
+            on_press: root.handle_button_press(self.name)
+            source: 'assets/question.png'
+            size_hint_x: None
+            width: 25
 
     BoxLayout:
         orientation: 'horizontal'

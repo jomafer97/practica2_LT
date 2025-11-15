@@ -2,7 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
-from .popups import ConfigPopup, GridForm
+from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 import os, sys
 
@@ -30,6 +30,18 @@ class Step4Panel(BoxLayout):
     def handle_button_press(self, button_name):
         if button_name == "softphone_destino":
             self.show_cost_results()
+        if button_name == "question_4":
+            self.open_question4_popup()
+
+    def open_question4_popup(self):
+        """ Abre popup con la información de este paso """
+        info_text_1 =("Para calcular y mostrar el BWst será necesario introducir el presupuesto")
+
+        popup = InfoPopup(
+            title="Información Paso 6",
+            info_text = info_text_1
+        )
+        popup.open()
 
     def open_config_popup(self):
         """Abre popup para configurar Parámetros de Costes."""
