@@ -1,6 +1,8 @@
-# Modificación del repositorio
+# VoIP4ALL
 
-1.  **Clona el repositorio (si es la primera vez)**
+## Modificación del repositorio
+
+1. **Clona el repositorio (si es la primera vez)**
 
     ⚠️ Si ya has clonado el repositorio antes, simplemente actualízalo ([+info](#mantener-tu-rama-actualizada-con-main))
 
@@ -8,6 +10,7 @@
     git clone git@github.com:jomafer97/practica2_LT.git
     cd practica2_LT
     ```
+
     Si os da fallo, es porque tendréis que configurar SSH con github pero no tiene mucha historia, chatgpt os lo explicará perfecto
 2. **Crear una rama de trabajo**
 
@@ -17,6 +20,7 @@
     ```bash
     git checkout -b nombre-de-tu-rama
     ```
+
     Usa nombres cortos y descriptivos sin espacios
 
     **Ya puedes modificar lo que necesites!**
@@ -35,7 +39,7 @@
 
 5. **Crear un Pull Request (PR)**
 
-En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldrá la opción de hacer un Pull Request (PR)
+En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer97/practica2_LT)), y os saldrá la opción de hacer un Pull Request (PR)
 
 1. **Selecciona tu rama como source (origen).**
 
@@ -59,6 +63,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
     ```
 
 ### **Opcional. Borrar ramas viejas**
+
 - Después de que tu PR haya sido fusionado:
 
     ```bash
@@ -66,55 +71,25 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
     git push origin --delete nombre-de-tu-rama # Borra rama remota
     ```
 
-# Frontend
-
-## 1. Requisitos Previos
-
-1.  **Configura el Entorno Virtual** para el frontend. Es una "caja" aislada para instalar las librerías de Python y no ensuciar tu sistema.
-
-    ```bash
-    # Navega a la carpeta del frontend
-    cd Client
-
-    # 1. Crea el entorno virtual (llámalo ".venv")
-    python3 -m venv .venv
-
-    # 2. Actívalo (verás (.venv) al inicio de tu línea de comandos)
-    source .venv/bin/activate
-
-    # 3. Instala las dependencias (Kivy) dentro del entorno
-    pip install -r ../requirements.txt
-    ```
-    *Nota: Solo necesitas crear el entorno (`-m venv`) la primera vez. Las siguientes veces, solo necesitas activarlo (`source .venv/bin/activate`).*
-
-## 2. Ejecución
-
-1.  **Frontend:**
-    Navega a la carpeta `Client/`, **activa el entorno virtual** y ejecuta la aplicación Kivy.
-    ```bash
-    cd Client
-    source .venv/bin/activate  # ¡Actívalo siempre!
-    python3 main.py
-    ```
-    *Se abrirá la ventana de la aplicación.*
-
-# CREACIÓN NUEVA PESTAÑA PARA EL FRONT
+## CREACIÓN NUEVA PESTAÑA PARA EL FRONT
 
 1. **Modificación Kivy:**
 
-    1. En *layout.kv* copiar y pegar a partir de **# --- PANEL --- #** hasta encontrar el siguiente **# --- PANEL --- #**(El PANEL 6 es el que menos cosas tiene y es el más sencillo)* Modificar <StepXPanel> por el nuemero siguiente *7* 
+    1. En *layout.kv* copiar y pegar a partir de **# --- PANEL --- #** hasta encontrar el siguiente **# --- PANEL --- #**(El PANEL 6 es el que menos cosas tiene y es el más sencillo)* Modificar <StepXPanel> por el nuemero siguiente *7*
 
     2. Modificar etiqueta Label dentro del primer BoxLayout para que se actualice la etiqueta de arriba en la que se indica el paso en el que estamos
-    ```
+
+    ```bash
             Label:
             text: "<cambiar al texto que querais>"
             font_size: '16sp'
             color: (0.9, 0.9, 0.9, 1)
             text_size: self.width, None
     ```
+
     3. En el segundo BoxLayout modificar el **on_press** donde se le pasa la acción.
 
-    ```
+    ```bash
         BoxLayout:
         orientation: 'horizontal'
         spacing: 10
@@ -126,38 +101,39 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
     ```
 
     4. En el último Button, modificar el **on_press** para llamar a la función del frontend
-    
-    ```
+
+    ```bash
         Button:
         text: 'Enviar Email (Paso 6)'
         size_hint_y: 0.15
         font_size: '16sp'
         background_color: (0.2, 0.8, 0.2, 1)
         on_press: root.nombre_de_la_funcion()
-    ``` 
+    ```
+
 2. **Creación nuevo panel_.py**
     1. Copiar uno de los panel.py que haya *(el panel_6.py es quizás el que menos cosas tenga)*
 
     2. Moficiar parámetros globales, que serán los argumentos del popup que se creará los argumentos en este caso son la etiqueta con la que lo mostraremos en el formulario, el tipo de dato, el valor por defecto y el nombre para almacenar el dato. 
 
-    ``` 
+    ```bash
     EMAIL_PARAMS_FIELDS = [
     ("Introduzca su email", "str", "correo de ejemplo", "email"),]
-    ``` 
+    ```
 
     3. Modificar el nombre de la clase al <StepXPanel> que hayais puesto antes.
 
     4. Modificar el **def handle_button_press(self, button_name)** para pasarle la descripción corta de la función que hemos indicado en el *layout.kv*, si no coincide el botón no funcionará.
 
-    ```
+    ```bash
     def handle_button_press(self, button_name): 
         if button_name == "<descripcion_corta_de_la_funcion>":
             self.open_config_popup()
     ```
 
     5. Modificar la función **def open_config_popup(self)** con el nombre que se le haya puesto a los parámetros globales. Esta función lo que hace es configurar el mensaje **REQUEST** para luego enviarlo.
-    
-    ```
+
+    ```bash
     def open_config_popup(self):
         """Abre popup para configurar Parámetros de REPORT."""
         form = GridForm()
@@ -178,7 +154,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
     6. Modificar la función **def send_email_data(self)** para enviar el REQUEST con el payload. 
 
-    ```
+    ```bash
     def send_<cambiar_por_el_que_querais>_data(self):
         """Envía REQUEST al servidor."""
         app = App.get_running_app()
@@ -200,7 +176,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
     7. Modificar la función **def _on_email_response()**. Con esta función hacemos el callback para procesar la respuesta, es importante cambiar el nombre de las variables para que correspondan con las definidas antes.
 
-    ```
+    ```bash
     def _on_<nombre_que_querais>_response(self, response):
         """Callback para procesar la respuesta REQUEST_RESPONSE."""
         try:
@@ -218,7 +194,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
     8. Modificar la función **def show_email_results**. Esta función muestra las respuestas que se le haya mandado el servidor.
 
-    ```
+    ```bash
     def show_<nombre_que_querais>_results(self):
         """Muestra el texto plano"""
         app = App.get_running_app()
@@ -238,7 +214,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
     9. Modificar la función **def _get_field_name()**. En este caso hay que modificar el nombre de los parámetros globales.
 
-    ```
+    ```bash
     def _get_field_name(self, label_text):
         for label, _, _, field_name in <NOMBRE_PARAMETROS_GLOBALES>:
             if label == label_text:
@@ -246,18 +222,17 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
         return None
     ```
 
-
 3. **Modificación screens.py**
 
     1. Importar el nuevo panel creado:
 
-    ```
+    ```bash
     from .<nombre_panel> import StepXPanel
     ```
 
     2. Modificar la función **def _go_back()**. Esta función define el funcionamiento del botón de atrás, que hace que retroceda.
 
-    ```
+    ```bash
     def _go_back(self, *args):
         app = App.get_running_app()
         screens = [
@@ -279,7 +254,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
     4. Añadir la clase, copiando y pegando la última y modificando los parámetros.
 
-    ```
+    ```bash
     class SeventhWindow(BaseScreen): <-- En este caso ya está modificada
 
     title = "<Titulo que querais>"
@@ -299,7 +274,7 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
 
     1. Importar la ventana creada.
 
-    ```
+    ```bash
     from gui.screens import (
     MainWindow,
     SecondWindow,
@@ -310,9 +285,10 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
     SeventhWindow, <-- Aquí ya está modificada
         )
     ```
+
     2. Modificar la clase **MainApp()**
 
-    ```
+    ```bash
      # Crear las 5 pantallas
         MainApp.main_window = MainWindow(name="main_window")
         MainApp.second_window = SecondWindow(name="second_window")
@@ -332,9 +308,3 @@ En GitHub, os vais ahora a https://github.com/jomafer97/practica2_LT, y os saldr
         screen_manager.add_widget(MainApp.sixth_window)
         screen_manager.add_widget(MainApp.seventh_window) <-- Aquí ya está modificada
     ```
-
-
-
-
-
-

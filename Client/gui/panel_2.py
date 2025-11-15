@@ -130,7 +130,12 @@ class Step2Panel(BoxLayout):
         print(f"DEBUG: Mostrando Erlangs={erlangs}, maxLines={max_lines}")
 
         form.add_widget(Label(text="Erlangs (Erlang):"))
-        form.add_widget(Label(text=str(erlangs), color=(1, 1, 1, 1), size_hint_x=1))
+        erlangs_str = (
+            f"{float(erlangs):.3f}"
+            if isinstance(erlangs, (int, float))
+            else str(erlangs)
+        )
+        form.add_widget(Label(text=erlangs_str, color=(1, 1, 1, 1), size_hint_x=1))
 
         form.add_widget(Label(text="maxLines (Líneas):"))
         form.add_widget(Label(text=str(max_lines), color=(1, 1, 1, 1), size_hint_x=1))
