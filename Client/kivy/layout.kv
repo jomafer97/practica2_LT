@@ -285,29 +285,16 @@
     orientation: 'vertical'
     padding: 10
     spacing: 10
-
+    
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
         size_hint_y: 0.35
 
         ImageButton:
-            source: 'assets/softphone.png'
-
-        ImageButton:
-            source: 'assets/network.png'
-
-        ImageButton:
-            id: softphone_destino
-            source: 'assets/softphone.png'
-            on_press: root.handle_button_press('softphone_destino')
-
-    Button:
-        text: 'PARÁMETROS PLR'
-        size_hint_y: 0.1
-        font_size: '16sp'
-        background_color: (0.6, 0.2, 0.8, 1)
-        on_press: root.open_config_popup()
+            text: 'PARÁMETROS PLR'
+            source: 'assets/archivo.png'
+            on_press: root.open_config_popup()
 
     ScrollView:
         size_hint_y: 0.4
