@@ -113,7 +113,7 @@ class Step3Panel(BoxLayout):
             elif key == "callBW":
                 value_str = f"{value:.2f} kbps"
             elif key == "BWst":
-                value_str = f"{value:.3f} %"
+                value_str = f"{value:.3f} Mbps"
             elif key == "pps":
                 value_str = f"{value} pps"
             else:
