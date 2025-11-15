@@ -25,8 +25,6 @@ TRAFFIC_PARAMS_FIELDS = [
 
 
 class Step3Panel(BoxLayout):
-    """Panel para Paso 3: Configuración de Parámetros de Tráfico (BW_REQUEST)."""
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "vertical"
@@ -35,17 +33,14 @@ class Step3Panel(BoxLayout):
         self.section = "Parámetros de Tráfico"
 
     def handle_button_press(self, button_name):
-        """Dispatch de botones a sus métodos correspondientes."""
         if button_name == "softphone_destino":
-            # Mostrar resultados de BW (si los hay)
             self.show_bw_results()
 
     def open_config_popup(self):
-        """Abre popup para configurar Parámetros de Tráfico."""
         form = GridForm()
 
         for label_text, input_type, default, *rest in TRAFFIC_PARAMS_FIELDS:
-            field_name = rest[-1]  # El último elemento es siempre el field_name
+            field_name = rest[-1]
 
             if input_type == "spinner":
                 options = rest[0]
@@ -56,7 +51,6 @@ class Step3Panel(BoxLayout):
             widget.bind(
                 text=lambda i, v, lt=label_text: self._on_field_change(i, v, lt)
             )
-            # Inicializar valor por defecto
             self._on_field_change(widget, default, label_text)
 
         popup = ConfigPopup(
@@ -65,29 +59,23 @@ class Step3Panel(BoxLayout):
         popup.open()
 
     def send_traffic_data(self):
-        """Envía BW_REQUEST al servidor con los Parámetros de Tráfico."""
         app = App.get_running_app()
         summary = getattr(app, "summary_data", {})
         traffic_data = summary.get(self.section, {})
 
         try:
-            # 1. Get Codec from Step 1
             codec = summary.get("Softphone (Origen)", {}).get("Codec", "G.711")
-
-            # 2. Get totalCalls from Step 2 results
             total_calls = getattr(app, "erlang_results_data", {}).get("maxLines", 0)
+
             if total_calls == "---" or total_calls == 0:
                 self._show_error_popup(
                     "No se han calculado las 'maxLines' del Paso 2 (Erlang)."
                 )
                 return
 
-            # 3. Process Encapsulation
             encap_str = traffic_data.get("Encapsulación", "Ethernet")
-            pppoe = "PPP" in encap_str # Esto funciona para "PPPoE" y "PPP + 802.1q"
-            vlan8021q = "802.1q" in encap_str # Esto funciona para "Ethernet + 802.1q" y "PPP + 802.1q"
-
-            # 4. Get Reserved BW from this panel
+            pppoe = "PPP" in encap_str
+            vlan8021q = "802.1q" in encap_str
             reserved_bw = float(traffic_data.get("BW Reservado", 0.2))
 
             payload = {
@@ -97,41 +85,49 @@ class Step3Panel(BoxLayout):
                 "reservedBW": reserved_bw,
                 "totalCalls": int(total_calls),
             }
+
             MessageSender.send("BW_REQUEST", payload, callback=self._on_bw_response)
+
         except (ValueError, KeyError, AttributeError) as e:
             self._show_error_popup(
                 f"Valores inválidos o faltan datos de pasos anteriores: {str(e)}"
             )
 
     def _on_bw_response(self, response):
-        """Callback para procesar la respuesta BW_RESPONSE del servidor."""
         try:
             bw_data = response if isinstance(response, dict) else {}
-
             app = App.get_running_app()
             app.bw_results_data = bw_data
-
             self.show_bw_results()
         except Exception as e:
             self._show_error_popup(f"Error procesando respuesta BW: {str(e)}")
 
     def show_bw_results(self):
-        """Muestra los resultados de BW guardados."""
         app = App.get_running_app()
         form = GridForm(cols=2)
-
         results = getattr(app, "bw_results_data", {})
 
-        # Helper to add nested data
         def add_result(form_widget, key, value, indent=""):
+            if key == "packetLength":
+                value_str = f"{value} bytes"
+            elif key == "callBW":
+                value_str = f"{value:.2f} kbps"
+            elif key == "BWst":
+                value_str = f"{value:.3f} %"
+            elif key == "pps":
+                value_str = f"{value} pps"
+            else:
+                value_str = str(value)
+
             form_widget.add_widget(Label(text=f"{indent}{key}:"))
+
             if isinstance(value, dict):
-                form_widget.add_widget(Label(text=""))  # Empty cell for dict title
+                form_widget.add_widget(Label(text=""))
                 for k, v in value.items():
                     add_result(form_widget, k, v, indent="    ")
             else:
                 form_widget.add_widget(
-                    Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1)
+                    Label(text=value_str, color=(1, 1, 1, 1), size_hint_x=1)
                 )
 
         if not results:
@@ -171,7 +167,7 @@ class Step3Panel(BoxLayout):
     def _get_field_name(self, label_text):
         for field_tuple in TRAFFIC_PARAMS_FIELDS:
             if field_tuple[0] == label_text:
-                return field_tuple[-1]  # El último item es el field_name
+                return field_tuple[-1]
         return None
 
     def _update_data(self, field_name, value):
