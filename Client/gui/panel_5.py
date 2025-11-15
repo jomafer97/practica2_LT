@@ -1,9 +1,11 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.spinner import Spinner
 from .popups import ConfigPopup, GridForm
 from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.filechooser import FileChooserListView
+from kivy.utils import platform
 import os, sys
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -12,9 +14,13 @@ if project_root not in sys.path:
 
 from .message_sender import MessageSender
 
-PLR_PARAMS_FIELDS = [
-    ("Bitstream (e.g., '11101...'):", "str", "1110101001011101", "Bitstream"),
-]
+# --- Directorio Home del Usuario ---
+if platform == 'win':
+    user_path = os.environ['USERPROFILE']
+else:
+    user_path = os.path.expanduser('~')
+
+BITSTREAM_KEY = "Bitstream"
 
 
 class Step5Panel(BoxLayout):
@@ -26,27 +32,76 @@ class Step5Panel(BoxLayout):
         self.padding = 10
         self.spacing = 10
         self.section = "Parámetros de PLR"
+        self.file_popup = None 
 
-    def handle_button_press(self, button_name):
-        if button_name == "softphone_destino":
-            self.show_plr_results()
 
     def open_config_popup(self):
-        """Abre popup para configurar Parámetros de PLR."""
-        form = GridForm()
-
-        for label_text, input_type, default, field_name in PLR_PARAMS_FIELDS:
-            widget = self._create_input_field(form, label_text, default, input_type)
-            widget.bind(
-                text=lambda i, v, lt=label_text: self._on_field_change(i, v, lt)
-            )
-            # Inicializar valor por defecto
-            self._on_field_change(widget, default, label_text)
-
-        popup = ConfigPopup(
-            title_text="Parámetros de PLR - Simulación", content_widget=form
+        """
+        Abre un Popup con un FileChooser para seleccionar un archivo .txt.
+        Se debe crear un Popup diferente por las peculiaridades de FileChooser
+        """
+        popup_layout = BoxLayout(orientation='vertical', spacing=10)
+        
+        self.filechooser = FileChooserListView(
+            path=user_path,  # Empezar en el directorio Home
+            filters=['*.txt']  # Mostrar archivos .txt
         )
-        popup.open()
+        popup_layout.add_widget(self.filechooser)
+
+        # Botones de "OK" y "Cancelar"
+        button_layout = BoxLayout(size_hint_y=None, height=44, spacing=10)
+        ok_btn = Button(text='Seleccionar')
+        cancel_btn = Button(text='Cancelar')
+        button_layout.add_widget(cancel_btn)
+        button_layout.add_widget(ok_btn)
+        popup_layout.add_widget(button_layout)
+
+        # Crear el Popup
+        self.file_popup = Popup(
+            title='Seleccionar archivo Bitstream (.txt)',
+            content=popup_layout,
+            size_hint=(0.9, 0.9)
+        )
+
+        cancel_btn.bind(on_press=self.file_popup.dismiss)
+        ok_btn.bind(on_press=self._on_file_selected)
+
+        self.file_popup.open()
+
+    def _on_file_selected(self, instance_button):
+        """
+        Callback que se ejecuta al pulsar "OK" en el FileChooser.
+        """
+        if self.filechooser.selection:
+            # Obtener la ruta del archivo
+            file_path = self.filechooser.selection[0]
+            
+            # Leer el archivo y actualizar los datos
+            self._read_bitstream_from_file(file_path)
+            
+            # Cerrar el popup del FileChooser
+            if self.file_popup:
+                self.file_popup.dismiss()
+
+    def _read_bitstream_from_file(self, path):
+        """
+        Lee el contenido del archivo y lo guarda en app.summary_data.
+        """
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                
+                content = f.read().strip() # Eliminamos los espacios
+            if not content:
+                self._show_error_popup("El archivo seleccionado está vacío.")
+                return
+            
+            self._update_data(BITSTREAM_KEY, content) # Actualiza la data con el contenido del archivo leído
+            self._update_summary_display() # Actualiza el resumen en el panel
+
+        except UnicodeDecodeError:
+            self._show_error_popup(f"Error: El archivo no es UTF - 8")        
+        except Exception as e:
+            self._show_error_popup(f"Error al leer el archivo:\n{e}")
 
     def send_plr_data(self):
         """Envía PLR_REQUEST al servidor."""
@@ -54,18 +109,30 @@ class Step5Panel(BoxLayout):
         plr_data = getattr(app, "summary_data", {}).get(self.section, {})
 
         try:
-            bitstream_str = plr_data.get("Bitstream", "")
+            bitstream_str = plr_data.get(BITSTREAM_KEY, "")
             if not bitstream_str:
-                self._show_error_popup("El Bitstream no puede estar vacío.")
+                self._show_error_popup("El Bitstream no puede estar vacío. Por favor, cargue un archivo.")
                 return
 
-            payload = {"bitstream": bitstream_str}
+            payload = {"bitstream": bitstream_str} 
+            
+            print(f"--- DEBUG: PASO 2 - Enviando PLR_REQUEST...")
+            print(f"--- DEBUG: Payload: {payload}")
+            
             MessageSender.send("PLR_REQUEST", payload, callback=self._on_plr_response)
+           
+            print("--- DEBUG: Mensaje enviado. Esperando respuesta (callback)...")
+
         except (ValueError, KeyError) as e:
+            print(f"--- DEBUG: ERROR - Excepción en send_plr_data: {e}")
             self._show_error_popup(f"Valores inválidos: {str(e)}")
 
     def _on_plr_response(self, response):
         """Callback para procesar la respuesta PLR_RESPONSE."""
+
+        print("\n--- DEBUG: PASO 3 - ¡Respuesta PLR recibida! ---")
+        print(f"--- DEBUG: Datos recibidos: {response}")
+
         try:
             plr_data = response if isinstance(response, dict) else {}
 
@@ -75,6 +142,7 @@ class Step5Panel(BoxLayout):
 
             self.show_plr_results()
         except Exception as e:
+            print(f"--- DEBUG: ERROR - Excepción en _on_plr_response: {e}")
             self._show_error_popup(f"Error procesando respuesta PLR: {str(e)}")
 
     def show_plr_results(self):
@@ -96,31 +164,7 @@ class Step5Panel(BoxLayout):
             title_text="Softphone (Destino) - Resultados PLR", content_widget=form
         )
         popup.open()
-
-    # --- Métodos Helper (idénticos a paneles anteriores) ---
-
-    def _create_input_field(self, form, label_text, default_value, input_type):
-        form.add_widget(Label(text=label_text))
-        widget = TextInput(multiline=False, text=default_value)
-        if input_type == "float":
-            widget.input_filter = "float"
-        elif input_type == "int":
-            widget.input_filter = "int"
-        # No filter for 'str'
-        form.add_widget(widget)
-        return widget
-
-    def _on_field_change(self, instance, value, label_text):
-        field_name = self._get_field_name(label_text)
-        if field_name:
-            self._update_data(field_name, value)
-            self._update_summary_display()
-
-    def _get_field_name(self, label_text):
-        for label, _, _, field_name in PLR_PARAMS_FIELDS:
-            if label == label_text:
-                return field_name
-        return None
+    # --- Métodos Helper ---
 
     def _update_data(self, field_name, value):
         app = App.get_running_app()
@@ -142,8 +186,13 @@ class Step5Panel(BoxLayout):
             summary_str = "Sin parámetros configurados aún."
         else:
             summary_str = f"{self.section.upper()}:\n"
-            for field_name, value in data.items():
-                summary_str += f"   • {field_name}: {value}\n"
+            # Mostramos el bitstream (o parte de él) en el resumen
+            bitstream_val = data.get(BITSTREAM_KEY, "")
+            if len(bitstream_val) > 50:
+                 summary_str += f"   • {BITSTREAM_KEY}: {bitstream_val[:50]}...\n"
+            else:
+                 summary_str += f"   • {BITSTREAM_KEY}: {bitstream_val}\n"
+
 
         if hasattr(self, "ids") and "panel_resultados" in self.ids:
             self.ids.panel_resultados.text = summary_str
@@ -153,3 +202,4 @@ class Step5Panel(BoxLayout):
         form.add_widget(Label(text=f"Error: {message}"))
         popup = ConfigPopup(title_text="Error de Entrada", content_widget=form)
         popup.open()
+
