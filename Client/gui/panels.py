@@ -13,9 +13,9 @@ if project_root not in sys.path:
 from .message_sender import MessageSender
 
 CODEC_QOE_MAP = {
-    "Excelente": ("G.711", "G.722"),
-    "Buena": ("G.729", "G.726", "ilbc_mode_20"),
-    "Normal": ("G.723.1", "G.726", "G.728", "ilbc_mode_30"),
+    "Excelente": ("G.711", "G722_64k"),
+    "Buena": ("G.729", "G.726_32k", "ilbc_mode_20"),
+    "Normal": ("G.723.1_6.3", "G.723.1_5.3", "G.726_24k", "G.728", "ilbc_mode_30"),
 }
 
 RT_RESPONSE_MAPPING = {
@@ -49,10 +49,10 @@ class MainPanel(BoxLayout):
         form = GridForm()
 
         qoe_spinner = self._create_spinner(
-            form, "Calidad Voz (QoE):", "Buena", ("Excelente", "Buena", "Normal")
+            form, "Calidad Voz (QoE):", "Excelente", ("Excelente", "Buena", "Normal")
         )
         codec_spinner = self._create_spinner(
-            form, "Codec (elegido):", "G.711", CODEC_QOE_MAP["Buena"]
+            form, "Codec (elegido):", "G.711", CODEC_QOE_MAP["Excelente"]
         )
         jitter_input = self._create_input(form, "Jitter (ms):", "", "float")
 
@@ -93,7 +93,12 @@ class MainPanel(BoxLayout):
             if delay_value is None:
                 return "Valor no calculado", (1, 1, 1, 1)  # Blanco
             if 0 <= delay_value <= 150:
-                return "Aceptable para la mayoría de aplicaciones", (0, 1, 0, 1)  # Verde
+                return "Aceptable para la mayoría de aplicaciones", (
+                    0,
+                    1,
+                    0,
+                    1,
+                )  # Verde
             elif 150 < delay_value <= 400:
                 return "Moderadamente aceptable", (1, 0.65, 0, 1)  # Naranja
             else:  # > 400
@@ -109,9 +114,7 @@ class MainPanel(BoxLayout):
             for key, field_name in RT_RESPONSE_MAPPING.items():
                 raw_value = results_data.get(key)
                 value_str = (
-                    f"{raw_value:.2f}"
-                    if isinstance(raw_value, (int, float))
-                    else "---"
+                    f"{raw_value:.2f}" if isinstance(raw_value, (int, float)) else "---"
                 )
                 form.add_widget(Label(text=f"{field_name}:"))
                 form.add_widget(
@@ -127,7 +130,9 @@ class MainPanel(BoxLayout):
                 ("rt2jit", "Retardo Total (Buffer x2)"),
                 ("rt1_5jit", "Retardo Total (Buffer x1.5)"),
             ]:
-                feedback_text, feedback_color = get_delay_feedback(results_data.get(key))
+                feedback_text, feedback_color = get_delay_feedback(
+                    results_data.get(key)
+                )
                 form.add_widget(Label(text=f"Valoración {name}:"))
                 form.add_widget(Label(text=feedback_text, color=feedback_color))
 
@@ -147,7 +152,7 @@ class MainPanel(BoxLayout):
 
         try:
             payload = {
-                "codec": summary.get(self.section_softphone, {}).get("Codec", "G.711"),
+                "codec": summary.get(self.section_softphone, {}).get("Codec"),
                 "jitter": float(
                     summary.get(self.section_softphone, {}).get("Jitter (ms)", 30)
                 ),
