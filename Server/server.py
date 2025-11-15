@@ -14,7 +14,23 @@ from report_creator import Report_creator_service
 IP = '127.0.0.1'
 
 class Server:
+    """
+    Servidor principal de la aplicación.
+
+    Esta clase es responsable de configurar el logging,
+    inicializar todos los servicios de cálculo (RT, Erlang, BW, Cost, PLR)
+    y lanzarlos cada uno en un hilo (thread) demonizado separado.
+    También gestiona el apagado ordenado de los servicios.
+    """
+
     def __init__(self):
+        """
+        Inicializa el servidor.
+
+        Configura un logger para registrar en 'server.log',
+        instancia cada uno de los servicios de cálculo pasándoles
+        el logger y los almacena en una lista 'self.services'.
+        """
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.file_handler = logging.FileHandler('server.log', mode='a', encoding='utf-8')
@@ -36,6 +52,13 @@ class Server:
         self.service_threads = []
 
     def start_services(self):
+        """
+        Inicia todos los servicios de cálculo en hilos separados.
+
+        Itera sobre la lista 'self.services', creando un hilo demonizado
+        (daemon=True) para cada uno, apuntando al método 'start()'
+        de dicho servicio. Luego, inicia todos los hilos.
+        """
         self.logger.info("Starting server...")
         for service in self.services:
             self.service_threads.append(threading.Thread(
@@ -49,6 +72,13 @@ class Server:
         self.logger.info("Server successfully started.")
 
     def stop(self):
+        """
+        Detiene todos los servicios de forma ordenada.
+
+        Itera sobre la lista 'self.services' y llama al método 'close()'
+        de cada uno, lo que debería cerrar sus sockets y permitir
+        que sus hilos terminen.
+        """
         for service in self.services:
             service.close()
 
