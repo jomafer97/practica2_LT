@@ -89,8 +89,14 @@ class Step5Panel(BoxLayout):
         )
 
         for key, value in results.items():
+
+            if isinstance(value, (int, float)):
+                value_str = f"{value:.3f}"
+            else:
+                value_str = str(value)
+
             form.add_widget(Label(text=f"{key}:"))
-            form.add_widget(Label(text=str(value), color=(1, 1, 1, 1), size_hint_x=1))
+            form.add_widget(Label(text=value_str, color=(1, 1, 1, 1), size_hint_x=1))
 
         popup = ConfigPopup(
             title_text="Softphone (Destino) - Resultados PLR", content_widget=form
