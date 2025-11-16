@@ -47,11 +47,19 @@ class MainPanel(BoxLayout):
 
     def open_question1_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("- Introducir la calidad de voz en el primer softphone según la tabla MOS de forma que aparezcan los codecs disponibles."
-                      "- Introducir Jitter y Retardo de la Red también en el primer softphone.")
+        info_text_1 = (
+            "Este panel te permite simular la calidad (QoS) de una llamada VoIP.\n\n"
+            "[b]1. Configurar Parámetros:[/b]\n"
+            "   - Haz clic en la imagen del softphone de la [color=33AFFF]izquierda[/color] para abrir el menú de configuración.\n"
+            "   - Selecciona la Calidad de Voz (QoE), el Codec, el Jitter y el Retardo de Red.\n\n"
+            "[b]2. Calcular Resultados:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Datos (Paso 1)'[/color] para que el servidor realice los cálculos de calidad.\n\n"
+            "[b]3. Ver Resultados:[/b]\n"
+            "   - Haz clic en la imagen del softphone de la [color=33AFFF]derecha[/color] para ver los resultados, incluyendo una valoración del retardo total."
+        )
 
         popup = InfoPopup(
-            title="Información Pasos 2 y 3",
+            title="Información Paso 1, 2 y 3: Cálculo QoS",
             info_text = info_text_1
         )
         popup.open()
