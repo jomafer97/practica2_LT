@@ -11,9 +11,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
 # --- CREDENTIALS ---
-SENDER_EMAIL = "josedavidalias@correo.ugr.es"
-SENDER_PASSWORD = "JdAs04"
-SMTP_SERVER = "correo.ugr.es"
+SENDER_EMAIL = ""
+SENDER_PASSWORD = ""
+SMTP_SERVER = ""
 SMTP_PORT = 587
 # --------------------
 

@@ -35,10 +35,20 @@ class Step4Panel(BoxLayout):
 
     def open_question4_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("Para calcular y mostrar el BWst será necesario introducir el presupuesto")
+        info_text_1 = (
+            "Este panel simula los costes y el número de llamadas posibles según un presupuesto.\n\n"
+            "[b]Dependencia:[/b] Este paso requiere que los cálculos de Ancho de Banda (BW) del [b]Paso 3[/b] se hayan completado.\n\n"
+            "[b]1. Configurar Parámetros:[/b]\n"
+            "   - Haz clic en el botón [color=9D33FF]'PARÁMETROS COSTES'[/color] para abrir el menú.\n"
+            "   - Introduce el [b]Presupuesto Máximo (Pmax)[/b] en euros.\n\n"
+            "[b]2. Calcular Resultados:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Datos (Paso 4 - COST)'[/color] para que el servidor calcule el coste por Mbps y cuántas llamadas son posibles con y sin compresión (cRTP).\n\n"
+            "[b]3. Ver Resultados:[/b]\n"
+            "   - Haz clic en la imagen del softphone de la [color=33AFFF]derecha[/color] para ver los resultados detallados."
+        )
 
         popup = InfoPopup(
-            title="Información Paso 6",
+            title="Información Paso 6: Simulación de Costes",
             info_text = info_text_1
         )
         popup.open()

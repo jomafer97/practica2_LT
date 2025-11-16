@@ -35,16 +35,24 @@ class Step2Panel(BoxLayout):
         """Dispatch de botones a sus métodos correspondientes."""
         if button_name == "softphone_destino":
             self.show_erlang_results()
-        if button_name == "question_2": 
+        if button_name == "question_2":
             self.open_question2_popup()
 
     def open_question2_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("Introducir Número de Empresas, Líneas / Cliente, Tiempo medio en la llamada y la probabilidad de bloqueo"
-        "de forma que podamos calcular el número de Erlang, así como el número máximo de llamadas simultáneas.")
+        info_text_1 = (
+            "Este panel calcula los parámetros de tráfico (GoS) usando el modelo Erlang-B.\n\n"
+            "[b]1. Configurar Parámetros:[/b]\n"
+            "   - Haz clic en el botón [color=9D33FF]'PARÁMETROS GLOBALES (GoS)'[/color] para abrir el menú.\n"
+            "   - Introduce el número de empresas, líneas por cliente, tiempo medio de llamada y la probabilidad de bloqueo deseada.\n\n"
+            "[b]2. Calcular Resultados:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Datos (Paso 2 - ERLANG)'[/color] para que el servidor calcule el tráfico en Erlangs y el número máximo de líneas simultáneas.\n\n"
+            "[b]3. Ver Resultados:[/b]\n"
+            "   - Haz clic en la imagen del softphone de la [color=33AFFF]derecha[/color] para ver los resultados calculados."
+        )
 
         popup = InfoPopup(
-            title="Información Paso 4",
+            title="Información Paso 4: Cálculo GoS",
             info_text = info_text_1
         )
         popup.open()

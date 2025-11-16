@@ -34,13 +34,22 @@ class Step6Panel(BoxLayout):
             self.open_config_popup()
         if button_name == "question_6":
             self.open_question6_popup()
-    
+
     def open_question6_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("Añadir información del envío del correo electrónico")
+        info_text_1 = (
+            "Este es el último paso, donde se recopila toda la información de los pasos anteriores para generar y enviar un informe completo por email.\n\n"
+            "[b]1. Configurar Email:[/b]\n"
+            "   - Haz clic en el [color=9D33FF]icono del email[/color] para abrir el menú de configuración.\n"
+            "   - Introduce tu dirección de correo electrónico en el campo de texto.\n\n"
+            "[b]2. Enviar Informe:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Email (Paso 6)'[/color]. La aplicación recopilará todos los datos de los pasos 1 al 5 y los enviará al servidor.\n\n"
+            "[b]3. Recibir Email:[/b]\n"
+            "   - El servidor generará un informe en formato PDF con todos los detalles y lo enviará a la dirección de email que proporcionaste."
+        )
 
         popup = InfoPopup(
-            title="Información Paso 8",
+            title="Información Paso 8: Envío de Informe por Email",
             info_text = info_text_1
         )
         popup.open()
@@ -71,7 +80,7 @@ class Step6Panel(BoxLayout):
         """
         Recopila TODOS los datos de la app y envía el
         gran payload 'REPORT_REQUEST'.
-        
+
         ESTA VERSIÓN ESTÁ CORREGIDA para buscar los datos
         en las 'cajas' (summary_data y results_data) correctas.
         """
@@ -94,9 +103,9 @@ class Step6Panel(BoxLayout):
             cost_resp_raw = getattr(app, "cost_results_data", {})
             plr_resp_raw = getattr(app, "plr_results_data", {})
 
-            
+
             # --- 3. Procesar datos que necesitan lógica (como en panel_3.py) ---
-            
+
             # Lógica de BW (Paso 3)
             encap_str = bw_req_raw.get("Encapsulación", "Ethernet")
             bw_pppoe = "PPPoE" in encap_str
@@ -106,14 +115,14 @@ class Step6Panel(BoxLayout):
             # --- 4. Construir el PAYLOAD final ---
             payload = {
                 "email": email_req_raw.get("email"),
-                
+
                 # --- PASO 1 ---
                 "RT_REQUEST": {
                     "codec": rt_req_raw.get("Codec"),
                     "jitter": float(rt_req_raw.get("Jitter (ms)")) if rt_req_raw.get("Jitter (ms)") else None,
                     "netDelay": float(rt_req_raw.get("Retardo de Red (ms)")) if rt_req_raw.get("Retardo de Red (ms)") else None,
                 },
-                "RT_RESPONSE": rt_resp_raw, 
+                "RT_RESPONSE": rt_resp_raw,
 
                 # --- PASO 2 ---
                 "ERLANG_REQUEST": {
@@ -127,7 +136,7 @@ class Step6Panel(BoxLayout):
                 # --- PASO 3 ---
                 "BW_REQUEST": {
                     # Datos rescatados de otros pasos
-                    "codec": rt_req_raw.get("Codec"), 
+                    "codec": rt_req_raw.get("Codec"),
                     "totalCalls": erlang_resp_raw.get("maxLines"),
                     # Datos procesados de este paso
                     "pppoe": bw_pppoe,
@@ -151,7 +160,7 @@ class Step6Panel(BoxLayout):
                     }
                 },
                 "COST_RESPONSE": cost_resp_raw,
-                
+
                 # --- PASO 5 ---
                 "PLR_REQUEST": {
                     "bitstream": plr_req_raw.get("Bitstream")
@@ -168,7 +177,7 @@ class Step6Panel(BoxLayout):
             MessageSender.send(
                 "REPORT_REQUEST", payload, callback=self._on_email_response
             )
-            
+
             # (Opcional) Imprime el payload que SÍ se está enviando
             print("--- DEBUG (PANEL 6): Enviando este payload al servidor ---")
             print(json.dumps(payload, indent=2))

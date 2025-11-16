@@ -1,6 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from .popups import ConfigPopup, GridForm, InfoPopup
+from kivy.uix.textinput import TextInput
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -32,21 +33,56 @@ class Step5Panel(BoxLayout):
         self.padding = 10
         self.spacing = 10
         self.section = "Parámetros de PLR"
-        self.file_popup = None 
+        self.file_popup = None
 
     def handle_button_press(self, button_name):
         if button_name == "question_5":
             self.open_question5_popup()
-    
+        if button_name == "configurar_manual":
+            self.open_text_input_popup()
+
     def open_question5_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("Para obtener los valores de p, q, pi1, pi0 y E será necesario introducir un fichero de texto"
-        "en formato txt")
+        info_text_1 = (
+            "Este panel calcula los parámetros necesarios para calcular la probabilidad de pérdida de paquetes (PLR) a partir de un bitstream.\n\n"
+            "[b]1. Introducir el Bitstream:[/b]\n"
+            "   Tienes dos opciones para proporcionar la traza de bits (una cadena de 0s y 1s):\n"
+            "   - [b]Cargar Fichero:[/b] Haz clic en el [color=9D33FF]icono del archivo[/color] para seleccionar un fichero `.txt` que contenga el bitstream.\n"
+            "   - [b]Entrada Manual:[/b] Haz clic en el botón [color=9D33FF]'Introducir Bitstream (Manual)'[/color] para pegar o escribir la cadena directamente.\n\n"
+            "[b]2. Calcular Resultados:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Datos (Paso 5 - PLR)'[/color] para que el servidor calcule los parámetros p, q, pi1, pi0 y E.\n\n"
+            "[b]3. Ver Resultados:[/b]\n"
+            "   - Los resultados se mostrarán automáticamente en una ventana emergente después del cálculo."
+        )
 
         popup = InfoPopup(
-            title="Información Paso 7",
+            title="Información Paso 7: Cálculo de PLR",
             info_text = info_text_1
         )
+        popup.open()
+
+    def open_text_input_popup(self):
+        """Abre un popup para introducir el bitstream manualmente."""
+        form = GridForm(cols=1)
+
+        app = App.get_running_app()
+        current_bitstream = getattr(app, "summary_data", {}).get(self.section, {}).get(BITSTREAM_KEY, "")
+
+        form.add_widget(Label(text="Introduzca el bitstream (cadena de 0s y 1s):"))
+        text_input = TextInput(text=current_bitstream, multiline=True)
+        form.add_widget(text_input)
+
+        def on_ok(instance):
+            content = text_input.text.strip()
+            if not content:
+                self._show_error_popup("El bitstream no puede estar vacío.")
+                return
+
+            self._update_data(BITSTREAM_KEY, content)
+            self._update_summary_display()
+
+        popup = ConfigPopup(title_text="Introducir Bitstream Manualmente", content_widget=form)
+        popup.bind(on_dismiss=on_ok)  # Guardar al cerrar
         popup.open()
 
     def open_config_popup(self):
@@ -55,7 +91,7 @@ class Step5Panel(BoxLayout):
         Se debe crear un Popup diferente por las peculiaridades de FileChooser
         """
         popup_layout = BoxLayout(orientation='vertical', spacing=10)
-        
+
         self.filechooser = FileChooserListView(
             path=user_path,  # Empezar en el directorio Home
             filters=['*.txt']  # Mostrar archivos .txt
@@ -89,10 +125,10 @@ class Step5Panel(BoxLayout):
         if self.filechooser.selection:
             # Obtener la ruta del archivo
             file_path = self.filechooser.selection[0]
-            
+
             # Leer el archivo y actualizar los datos
             self._read_bitstream_from_file(file_path)
-            
+
             # Cerrar el popup del FileChooser
             if self.file_popup:
                 self.file_popup.dismiss()
@@ -103,17 +139,17 @@ class Step5Panel(BoxLayout):
         """
         try:
             with open(path, 'r', encoding='utf-8') as f:
-                
+
                 content = f.read().strip() # Eliminamos los espacios
             if not content:
                 self._show_error_popup("El archivo seleccionado está vacío.")
                 return
-            
+
             self._update_data(BITSTREAM_KEY, content) # Actualiza la data con el contenido del archivo leído
             self._update_summary_display() # Actualiza el resumen en el panel
 
         except UnicodeDecodeError:
-            self._show_error_popup(f"Error: El archivo no es UTF - 8")        
+            self._show_error_popup(f"Error: El archivo no es UTF - 8")
         except Exception as e:
             self._show_error_popup(f"Error al leer el archivo:\n{e}")
 
@@ -128,13 +164,13 @@ class Step5Panel(BoxLayout):
                 self._show_error_popup("El Bitstream no puede estar vacío. Por favor, cargue un archivo.")
                 return
 
-            payload = {"bitstream": bitstream_str} 
-            
+            payload = {"bitstream": bitstream_str}
+
             print(f"--- DEBUG: PASO 2 - Enviando PLR_REQUEST...")
             print(f"--- DEBUG: Payload: {payload}")
-            
+
             MessageSender.send("PLR_REQUEST", payload, callback=self._on_plr_response)
-           
+
             print("--- DEBUG: Mensaje enviado. Esperando respuesta (callback)...")
 
         except (ValueError, KeyError) as e:
@@ -222,4 +258,3 @@ class Step5Panel(BoxLayout):
         form.add_widget(Label(text=f"Error: {message}"))
         popup = ConfigPopup(title_text="Error de Entrada", content_widget=form)
         popup.open()
-
