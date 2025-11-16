@@ -34,22 +34,13 @@ class Step6Panel(BoxLayout):
             self.open_config_popup()
         if button_name == "question_6":
             self.open_question6_popup()
-
+    
     def open_question6_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 = (
-            "Este es el último paso, donde se recopila toda la información de los pasos anteriores para generar y enviar un informe completo por email.\n\n"
-            "[b]1. Configurar Email:[/b]\n"
-            "   - Haz clic en el [color=9D33FF]icono del email[/color] para abrir el menú de configuración.\n"
-            "   - Introduce tu dirección de correo electrónico en el campo de texto.\n\n"
-            "[b]2. Enviar Informe:[/b]\n"
-            "   - Pulsa el botón [color=33FF57]'Enviar Email (Paso 6)'[/color]. La aplicación recopilará todos los datos de los pasos 1 al 5 y los enviará al servidor.\n\n"
-            "[b]3. Recibir Email:[/b]\n"
-            "   - El servidor generará un informe en formato PDF con todos los detalles y lo enviará a la dirección de email que proporcionaste."
-        )
+        info_text_1 =("Añadir información del envío del correo electrónico")
 
         popup = InfoPopup(
-            title="Información Paso 8: Envío de Informe por Email",
+            title="Información Paso 8",
             info_text = info_text_1
         )
         popup.open()
@@ -80,7 +71,7 @@ class Step6Panel(BoxLayout):
         """
         Recopila TODOS los datos de la app y envía el
         gran payload 'REPORT_REQUEST'.
-
+        
         ESTA VERSIÓN ESTÁ CORREGIDA para buscar los datos
         en las 'cajas' (summary_data y results_data) correctas.
         """
@@ -103,9 +94,9 @@ class Step6Panel(BoxLayout):
             cost_resp_raw = getattr(app, "cost_results_data", {})
             plr_resp_raw = getattr(app, "plr_results_data", {})
 
-
+            
             # --- 3. Procesar datos que necesitan lógica (como en panel_3.py) ---
-
+            
             # Lógica de BW (Paso 3)
             encap_str = bw_req_raw.get("Encapsulación", "Ethernet")
             bw_pppoe = "PPPoE" in encap_str
@@ -115,14 +106,14 @@ class Step6Panel(BoxLayout):
             # --- 4. Construir el PAYLOAD final ---
             payload = {
                 "email": email_req_raw.get("email"),
-
+                
                 # --- PASO 1 ---
                 "RT_REQUEST": {
                     "codec": rt_req_raw.get("Codec"),
                     "jitter": float(rt_req_raw.get("Jitter (ms)")) if rt_req_raw.get("Jitter (ms)") else None,
                     "netDelay": float(rt_req_raw.get("Retardo de Red (ms)")) if rt_req_raw.get("Retardo de Red (ms)") else None,
                 },
-                "RT_RESPONSE": rt_resp_raw,
+                "RT_RESPONSE": rt_resp_raw, 
 
                 # --- PASO 2 ---
                 "ERLANG_REQUEST": {
@@ -136,7 +127,7 @@ class Step6Panel(BoxLayout):
                 # --- PASO 3 ---
                 "BW_REQUEST": {
                     # Datos rescatados de otros pasos
-                    "codec": rt_req_raw.get("Codec"),
+                    "codec": rt_req_raw.get("Codec"), 
                     "totalCalls": erlang_resp_raw.get("maxLines"),
                     # Datos procesados de este paso
                     "pppoe": bw_pppoe,
@@ -160,7 +151,7 @@ class Step6Panel(BoxLayout):
                     }
                 },
                 "COST_RESPONSE": cost_resp_raw,
-
+                
                 # --- PASO 5 ---
                 "PLR_REQUEST": {
                     "bitstream": plr_req_raw.get("Bitstream")
@@ -177,7 +168,7 @@ class Step6Panel(BoxLayout):
             MessageSender.send(
                 "REPORT_REQUEST", payload, callback=self._on_email_response
             )
-
+            
             # (Opcional) Imprime el payload que SÍ se está enviando
             print("--- DEBUG (PANEL 6): Enviando este payload al servidor ---")
             print(json.dumps(payload, indent=2))
@@ -207,24 +198,56 @@ class Step6Panel(BoxLayout):
             self._show_error_popup(f"Error procesando respuesta REPORT: {str(e)}")
 
     def show_email_results(self):
-        """Muestra un popup de éxito/fracaso del envío del informe."""
+        """
+        Muestra un popup con el INFORME COMPLETO recibido del servidor,
+        o un mensaje de error si algo falló.
+        """
         app = App.get_running_app()
-        form = GridForm(cols=1)
-
         results = getattr(
             app,
             "email_results_data",
-            {"status": "Respuesta desconocida"},
+            {"error": "Respuesta desconocida del servidor"},
         )
 
-        form.add_widget(Label(text="Informe enviado al servidor."))
-        form.add_widget(
-            Label(text=f"Respuesta del servidor: {results.get('status', str(results))}")
-        )
+        # Comprobar si la respuesta contiene el informe
+        if 'report' in results:
+            # ÉXITO: Mostrar el informe en un TextInput
+            title = "Informe Recibido del Servidor"
+            report_text = results['report']
+            
+            # Usamos TextInput para poder scrollear y ver el formato
+            content_widget = TextInput(
+                text=report_text,
+                readonly=True,
+                size_hint=(1, 1)
+            )
+            
+            # Definimos un tamaño de popup grande
+            size_hint = (0.9, 0.9) # 90% ancho, 90% alto
 
-        popup = ConfigPopup(title_text="Informe Enviado", content_widget=form)
+        # Comprobar si la respuesta es un error
+        elif 'error' in results:
+            # ERROR: Mostrar el mensaje de error
+            title = "Error del Servidor"
+            error_msg = f"Servicio: {results.get('source', 'Desconocido')}\n\nError: {results['error']}"
+            
+            content_widget = Label(text=error_msg)
+            size_hint = (0.7, 0.4) # Popup más pequeño para error
+
+        # Si es otro tipo de respuesta
+        else:
+            title = "Respuesta Recibida"
+            content_widget = Label(text=f"Respuesta:\n{str(results)}")
+            size_hint = (0.8, 0.5)
+
+        # --- Crear y abrir el popup ---
+        popup = ConfigPopup(
+            title_text=title,
+            content_widget=content_widget,
+            size_hint=size_hint
+        )
         popup.open()
-
+        
     def _create_input_field(self, form, label_text, default_value, input_type):
         form.add_widget(Label(text=label_text))
         widget = TextInput(multiline=False, text=default_value)
