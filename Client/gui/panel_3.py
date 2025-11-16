@@ -2,7 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
-from .popups import ConfigPopup, GridForm
+from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 import os, sys
 
@@ -35,6 +35,19 @@ class Step3Panel(BoxLayout):
     def handle_button_press(self, button_name):
         if button_name == "softphone_destino":
             self.show_bw_results()
+        if button_name == "question_3":
+            self.open_question3_popup()
+
+    def open_question3_popup(self):
+        """ Abre popup con la información de este paso """
+        info_text_1 =("Para calculary mostrar el ancho de banda será necesario introducir el tipo de encapsulación"
+        "deseada, así como el BW Reservado")
+
+        popup = InfoPopup(
+            title="Información Paso 5",
+            info_text = info_text_1
+        )
+        popup.open()
 
     def open_config_popup(self):
         form = GridForm()

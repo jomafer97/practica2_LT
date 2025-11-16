@@ -2,7 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
-from .popups import ConfigPopup, GridForm
+from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 import os, sys
 
@@ -30,6 +30,19 @@ class Step6Panel(BoxLayout):
     def handle_button_press(self, button_name):
         if button_name == "configurar_email":
             self.open_config_popup()
+        if button_name == "question_6":
+            self.open_question6_popup()
+            
+    def open_question6_popup(self):
+        """ Abre popup con la información de este paso """
+        info_text_1 =("Para generar el report será necesario introducir el email pinchando en el icono.")
+
+        popup = InfoPopup(
+            title="Información Paso 8",
+            info_text = info_text_1
+        )
+        popup.open()
+
 
     def open_config_popup(self):
         """Abre popup para configurar Parámetros de REPORT."""
