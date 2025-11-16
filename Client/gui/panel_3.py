@@ -40,11 +40,19 @@ class Step3Panel(BoxLayout):
 
     def open_question3_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("Para calculary mostrar el ancho de banda será necesario introducir el tipo de encapsulación"
-        "deseada, así como el BW Reservado")
+        info_text_1 = (
+            "Este panel calcula el ancho de banda (BW) necesario para las llamadas.\n\n"
+            "[b]1. Configurar Parámetros:[/b]\n"
+            "   - Haz clic en el botón [color=9D33FF]'PARÁMETROS TRÁFICO (BW)'[/color] para abrir el menú.\n"
+            "   - Selecciona el tipo de [b]Encapsulación L2[/b] y el [b]BW Reservado[/b] (un porcentaje entre 0 y 1).\n\n"
+            "[b]2. Calcular Resultados:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Datos (Paso 3 - BW)'[/color] para que el servidor calcule el ancho de banda requerido.\n\n"
+            "[b]3. Ver Resultados:[/b]\n"
+            "   - Haz clic en la imagen del softphone de la [color=33AFFF]derecha[/color] para ver los resultados detallados del cálculo de BW."
+        )
 
         popup = InfoPopup(
-            title="Información Paso 5",
+            title="Información Paso 5: Cálculo de Ancho de Banda",
             info_text = info_text_1
         )
         popup.open()

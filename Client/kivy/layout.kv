@@ -19,9 +19,9 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+
         Image:
-            source: 'assets/softphone.png' 
+            source: 'assets/softphone.png'
             size_hint_x: None
             width: 30
 
@@ -30,7 +30,7 @@
             font_size: '16sp'
             color: (0.9, 0.9, 0.9, 1)
             text_size: self.width, None
-        
+
         ImageButton:
             id: question_1
             name: 'question_1'
@@ -38,7 +38,7 @@
             source: 'assets/question.png'
             size_hint_x: None
             width: 25
-        
+
 
 
     BoxLayout:
@@ -98,7 +98,7 @@
         on_press: root.send_data()
 
 <InfoPopup>:
-    size_hint: (0.9, 0.9) 
+    size_hint: (0.9, 0.9)
     title: "Información"
     auto_dismiss: False
 
@@ -109,9 +109,10 @@
 
         Label:
             id: info_label
-            text: root.info_text 
+            text: root.info_text
             text_size: self.width, None
             valign: 'top'
+            markup: True
             size_hint_y: 1
             height: self.texture_size[1]
 
@@ -119,7 +120,7 @@
             text: 'Cerrar'
             on_release: root.dismiss()
             size_hint_y: None
-            height: '48dp' 
+            height: '48dp'
 
 <ConfigPopup>:
     title: root.title_text
@@ -167,9 +168,9 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+
         Image:
-            source: 'assets/softphone.png' 
+            source: 'assets/softphone.png'
             size_hint_x: None
             width: 30
 
@@ -260,9 +261,9 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+
         Image:
-            source: 'assets/softphone.png' 
+            source: 'assets/softphone.png'
             size_hint_x: None
             width: 30
 
@@ -350,9 +351,9 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+
         Image:
-            source: 'assets/softphone.png' 
+            source: 'assets/softphone.png'
             size_hint_x: None
             width: 30
 
@@ -440,9 +441,9 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+
         Image:
-            source: 'assets/archivo.png' 
+            source: 'assets/archivo.png'
             size_hint_x: None
             width: 30
 
@@ -466,9 +467,14 @@
         size_hint_y: 0.35
 
         ImageButton:
-            text: 'PARÁMETROS PLR'
+            # Botón para cargar desde fichero
             source: 'assets/archivo.png'
             on_press: root.open_config_popup()
+
+        Button:
+            # Nuevo botón para introducir manualmente
+            text: 'Introducir Bitstream (Manual)'
+            on_press: root.handle_button_press('configurar_manual')
 
     ScrollView:
         size_hint_y: 0.4
@@ -517,9 +523,9 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        
+
         Image:
-            source: 'assets/email.png' 
+            source: 'assets/email.png'
             size_hint_x: None
             width: 30
 
