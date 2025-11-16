@@ -5,6 +5,8 @@ from kivy.uix.spinner import Spinner
 from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 import os, sys
+import json  # <-- AÑADIDO
+import traceback  # <-- AÑADIDO
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if project_root not in sys.path:
@@ -32,17 +34,16 @@ class Step6Panel(BoxLayout):
             self.open_config_popup()
         if button_name == "question_6":
             self.open_question6_popup()
-            
+    
     def open_question6_popup(self):
         """ Abre popup con la información de este paso """
-        info_text_1 =("Para generar el report será necesario introducir el email pinchando en el icono.")
+        info_text_1 =("Añadir información del envío del correo electrónico")
 
         popup = InfoPopup(
             title="Información Paso 8",
             info_text = info_text_1
         )
         popup.open()
-
 
     def open_config_popup(self):
         """Abre popup para configurar Parámetros de REPORT."""
@@ -65,135 +66,123 @@ class Step6Panel(BoxLayout):
         )
         popup.open()
 
+    # --- ESTA ES LA FUNCIÓN CORREGIDA ---
     def send_email_data(self):
         """
         Recopila TODOS los datos de la app y envía el
         gran payload 'REPORT_REQUEST'.
+        
+        ESTA VERSIÓN ESTÁ CORREGIDA para buscar los datos
+        en las 'cajas' (summary_data y results_data) correctas.
         """
         app = App.get_running_app()
         summary_data = getattr(app, "summary_data", {})
 
         try:
+            # --- 1. Rescatar todos los DATOS DE ENTRADA (REQUESTS) ---
             rt_req_raw = summary_data.get("Softphone (Origen)", {})
             erlang_req_raw = summary_data.get("Parámetros Globales", {})
-            bw_req_raw = summary_data.get("Parámetros BW", {})
-            cost_req_raw = summary_data.get("Parámetros Coste", {})
-            plr_req_raw = summary_data.get("Parámetros PLR", {})
+            bw_req_raw = summary_data.get("Parámetros de Tráfico", {}) # <-- Nombre arreglado
+            cost_req_raw = summary_data.get("Parámetros de Costes", {}) # <-- Nombre arreglado
+            plr_req_raw = summary_data.get("Parámetros de PLR", {})    # <-- Nombre arreglado
             email_req_raw = summary_data.get("Envio Email", {})
 
+            # --- 2. Rescatar todas las RESPUESTAS (RESULTS) ---
             rt_resp_raw = getattr(app, "destination_results_data", {})
             erlang_resp_raw = getattr(app, "erlang_results_data", {})
             bw_resp_raw = getattr(app, "bw_results_data", {})
             cost_resp_raw = getattr(app, "cost_results_data", {})
             plr_resp_raw = getattr(app, "plr_results_data", {})
 
+            
+            # --- 3. Procesar datos que necesitan lógica (como en panel_3.py) ---
+            
+            # Lógica de BW (Paso 3)
+            encap_str = bw_req_raw.get("Encapsulación", "Ethernet")
+            bw_pppoe = "PPPoE" in encap_str
+            bw_vlan8021q = "802.1q" in encap_str
+            bw_reserved = float(bw_req_raw.get("BW Reservado", 0.2))
+
+            # --- 4. Construir el PAYLOAD final ---
             payload = {
                 "email": email_req_raw.get("email"),
+                
+                # --- PASO 1 ---
                 "RT_REQUEST": {
                     "codec": rt_req_raw.get("Codec"),
-                    "jitter": (
-                        float(rt_req_raw.get("Jitter (ms)"))
-                        if rt_req_raw.get("Jitter (ms)")
-                        else None
-                    ),
-                    "netDelay": (
-                        float(rt_req_raw.get("Retardo de Red (ms)"))
-                        if rt_req_raw.get("Retardo de Red (ms)")
-                        else None
-                    ),
+                    "jitter": float(rt_req_raw.get("Jitter (ms)")) if rt_req_raw.get("Jitter (ms)") else None,
+                    "netDelay": float(rt_req_raw.get("Retardo de Red (ms)")) if rt_req_raw.get("Retardo de Red (ms)") else None,
                 },
-                "RT_RESPONSE": {
-                    "rt2jit": rt_resp_raw.get("Rt2jit (ms)"),
-                    "rt1_5jit": rt_resp_raw.get("Rt1_5jit (ms)"),
-                    "csi": rt_resp_raw.get("CSI (ms)"),
-                    "rphy": rt_resp_raw.get("Rphy (ms)"),
-                    "rpac": rt_resp_raw.get("Rpaq (ms)"),
-                    "algD": rt_resp_raw.get(
-                        "algD"
-                    ),  # (No estaba en tu Panel 1, pero sí en tu JSON)
-                },
+                "RT_RESPONSE": rt_resp_raw, 
+
+                # --- PASO 2 ---
                 "ERLANG_REQUEST": {
-                    "numLines": (
-                        int(erlang_req_raw.get("Num. Empresas"))
-                        if erlang_req_raw.get("Num. Empresas")
-                        else None
-                    ),
-                    "numCalls": (
-                        int(erlang_req_raw.get("Líneas / Cliente"))
-                        if erlang_req_raw.get("Líneas / Cliente")
-                        else None
-                    ),
-                    "avgDuration": (
-                        float(erlang_req_raw.get("T. Medio Llamada"))
-                        if erlang_req_raw.get("T. Medio Llamada")
-                        else None
-                    ),
-                    "blockingPercentage": (
-                        float(erlang_req_raw.get("Prob. Bloqueo"))
-                        if erlang_req_raw.get("Prob. Bloqueo")
-                        else None
-                    ),
+                    "numLines": int(erlang_req_raw.get("Num. Empresas")) if erlang_req_raw.get("Num. Empresas") else None,
+                    "numCalls": int(erlang_req_raw.get("Líneas / Cliente")) if erlang_req_raw.get("Líneas / Cliente") else None,
+                    "avgDuration": float(erlang_req_raw.get("T. Medio Llamada")) if erlang_req_raw.get("T. Medio Llamada") else None,
+                    "blockingPercentage": float(erlang_req_raw.get("Prob. Bloqueo")) if erlang_req_raw.get("Prob. Bloqueo") else None,
                 },
-                "ERLANG_RESPONSE": {
-                    "Erlangs": erlang_resp_raw.get("Erlangs"),
-                    "maxLines": erlang_resp_raw.get("maxLines"),
-                },
-                # --- El resto de paneles (sigue este patrón) ---
+                "ERLANG_RESPONSE": erlang_resp_raw,
+
+                # --- PASO 3 ---
                 "BW_REQUEST": {
-                    "codec": bw_req_raw.get("Codec"),  # (Nombre de campo asumido)
-                    "pppoe": bw_req_raw.get("pppoe"),  # (Nombre de campo asumido)
-                    "vlan8021q": bw_req_raw.get(
-                        "vlan8021q"
-                    ),  # (Nombre de campo asumido)
-                    "reservedBW": (
-                        float(bw_req_raw.get("reservedBW"))
-                        if bw_req_raw.get("reservedBW")
-                        else None
-                    ),  # (Nombre de campo asumido)
-                    "totalCalls": (
-                        int(bw_req_raw.get("totalCalls"))
-                        if bw_req_raw.get("totalCalls")
-                        else None
-                    ),  # (Nombre de campo asumido)
+                    # Datos rescatados de otros pasos
+                    "codec": rt_req_raw.get("Codec"), 
+                    "totalCalls": erlang_resp_raw.get("maxLines"),
+                    # Datos procesados de este paso
+                    "pppoe": bw_pppoe,
+                    "vlan8021q": bw_vlan8021q,
+                    "reservedBW": bw_reserved,
                 },
-                "BW_RESPONSE": bw_resp_raw,  # Asumimos que la respuesta ya tiene la estructura correcta
+                "BW_RESPONSE": bw_resp_raw,
+
+                # --- PASO 4 ---
                 "COST_REQUEST": {
-                    # (Completa con los campos de tu panel de Costes)
-                    "Pmax": (
-                        float(cost_req_raw.get("Pmax"))
-                        if cost_req_raw.get("Pmax")
-                        else None
-                    ),  # (Nombre de campo asumido)
-                    "callBW": cost_req_raw.get(
-                        "callBW"
-                    ),  # (Esto vendrá de BW_RESPONSE)
-                    "BWst": cost_req_raw.get("BWst"),  # (Esto vendrá de BW_RESPONSE)
+                    # Dato de este paso
+                    "Pmax": float(cost_req_raw.get("Pmax")) if cost_req_raw.get("Pmax") else None,
+                    # Datos rescatados de la respuesta del Paso 3
+                    "callBW": {
+                        "RTP": bw_resp_raw.get("uncompressed", {}).get("callBW"),
+                        "cRTP": bw_resp_raw.get("compressed", {}).get("callBW")
+                    },
+                    "BWst": {
+                        "RTP": bw_resp_raw.get("uncompressed", {}).get("BWst"),
+                        "cRTP": bw_resp_raw.get("compressed", {}).get("BWst")
+                    }
                 },
-                "COST_RESPONSE": cost_resp_raw,  # Asumimos que la respuesta ya tiene la estructura correcta
+                "COST_RESPONSE": cost_resp_raw,
+                
+                # --- PASO 5 ---
                 "PLR_REQUEST": {
-                    "bitstream": plr_req_raw.get(
-                        "bitstream"
-                    )  # (Nombre de campo asumido)
+                    "bitstream": plr_req_raw.get("Bitstream")
                 },
-                "PLR_RESPONSE": plr_resp_raw,  # Asumimos que la respuesta ya tiene la estructura correcta
+                "PLR_RESPONSE": plr_resp_raw
             }
 
-            # --- 4. Validación de Email ---
+            # --- 5. Validación de Email ---
             if not payload["email"]:
-                self._show_error_popup(
-                    "El email no puede estar vacío. Configúralo primero."
-                )
+                self._show_error_popup("El email no puede estar vacío. Configúralo primero.")
                 return
 
-            # --- 5. Envío ---
+            # --- 6. Envío ---
             MessageSender.send(
                 "REPORT_REQUEST", payload, callback=self._on_email_response
             )
+            
+            # (Opcional) Imprime el payload que SÍ se está enviando
+            print("--- DEBUG (PANEL 6): Enviando este payload al servidor ---")
+            print(json.dumps(payload, indent=2))
+            # ---------------------------------------------------------------
 
-        except (ValueError, KeyError, TypeError) as e:
-            self._show_error_popup(
-                f"Error al construir el informe: {str(e)}. Faltan datos de pasos anteriores."
-            )
+
+        except (ValueError, KeyError, TypeError, AttributeError) as e:
+            error_msg = f"Error al construir el informe: {str(e)}. Faltan datos de pasos anteriores. Asegúrate de pulsar 'Calcular' en TODOS los pasos."
+            print(f"--- ERROR (PANEL 6): {error_msg}")
+            self._show_error_popup(error_msg)
+            # Imprime el traceback en la consola del cliente para depurar
+            traceback.print_exc()
+    # --- FIN DE LA FUNCIÓN CORREGIDA ---
+
 
     def _on_email_response(self, response):
         """Callback para procesar la respuesta REQUEST_RESPONSE."""
