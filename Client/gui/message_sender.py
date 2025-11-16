@@ -49,7 +49,7 @@ class MessageSender:
         addr = ("127.0.0.1", port)
         try:
             client.send_message(message, addr)
-            answer, _ = client.recv_message(1024)
+            answer, _ = client.recv_message(8192)
             print(f"Respuesta recibida ({msg_type}): {answer}")
 
             # Ejecutar callback si se proporciona
