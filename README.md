@@ -39,7 +39,7 @@
 
 5. **Crear un Pull Request (PR)**
 
-En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer97/practica2_LT)), y os saldrá la opción de hacer un Pull Request (PR)
+En GitHub, os vais ahora al [github del repositorio](https://github.com/jomafer97/practica2_LT), y os saldrá la opción de hacer un Pull Request (PR)
 
 1. **Selecciona tu rama como source (origen).**
 
@@ -116,7 +116,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     2. Moficiar parámetros globales, que serán los argumentos del popup que se creará los argumentos en este caso son la etiqueta con la que lo mostraremos en el formulario, el tipo de dato, el valor por defecto y el nombre para almacenar el dato. 
 
-    ```bash
+    ```python
     EMAIL_PARAMS_FIELDS = [
     ("Introduzca su email", "str", "correo de ejemplo", "email"),]
     ```
@@ -125,7 +125,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     4. Modificar el **def handle_button_press(self, button_name)** para pasarle la descripción corta de la función que hemos indicado en el *layout.kv*, si no coincide el botón no funcionará.
 
-    ```bash
+    ```python
     def handle_button_press(self, button_name): 
         if button_name == "<descripcion_corta_de_la_funcion>":
             self.open_config_popup()
@@ -133,7 +133,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     5. Modificar la función **def open_config_popup(self)** con el nombre que se le haya puesto a los parámetros globales. Esta función lo que hace es configurar el mensaje **REQUEST** para luego enviarlo.
 
-    ```bash
+    ```python
     def open_config_popup(self):
         """Abre popup para configurar Parámetros de REPORT."""
         form = GridForm()
@@ -154,7 +154,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     6. Modificar la función **def send_email_data(self)** para enviar el REQUEST con el payload. 
 
-    ```bash
+    ```python
     def send_<cambiar_por_el_que_querais>_data(self):
         """Envía REQUEST al servidor."""
         app = App.get_running_app()
@@ -176,7 +176,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     7. Modificar la función **def _on_email_response()**. Con esta función hacemos el callback para procesar la respuesta, es importante cambiar el nombre de las variables para que correspondan con las definidas antes.
 
-    ```bash
+    ```python
     def _on_<nombre_que_querais>_response(self, response):
         """Callback para procesar la respuesta REQUEST_RESPONSE."""
         try:
@@ -194,7 +194,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     8. Modificar la función **def show_email_results**. Esta función muestra las respuestas que se le haya mandado el servidor.
 
-    ```bash
+    ```python
     def show_<nombre_que_querais>_results(self):
         """Muestra el texto plano"""
         app = App.get_running_app()
@@ -214,7 +214,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     9. Modificar la función **def _get_field_name()**. En este caso hay que modificar el nombre de los parámetros globales.
 
-    ```bash
+    ```python
     def _get_field_name(self, label_text):
         for label, _, _, field_name in <NOMBRE_PARAMETROS_GLOBALES>:
             if label == label_text:
@@ -226,13 +226,13 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     1. Importar el nuevo panel creado:
 
-    ```bash
+    ```python
     from .<nombre_panel> import StepXPanel
     ```
 
     2. Modificar la función **def _go_back()**. Esta función define el funcionamiento del botón de atrás, que hace que retroceda.
 
-    ```bash
+    ```python
     def _go_back(self, *args):
         app = App.get_running_app()
         screens = [
@@ -254,7 +254,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     4. Añadir la clase, copiando y pegando la última y modificando los parámetros.
 
-    ```bash
+    ```python
     class SeventhWindow(BaseScreen): <-- En este caso ya está modificada
 
     title = "<Titulo que querais>"
@@ -274,7 +274,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     1. Importar la ventana creada.
 
-    ```bash
+    ```python
     from gui.screens import (
     MainWindow,
     SecondWindow,
@@ -288,7 +288,7 @@ En GitHub, os vais ahora al ([github del repositorio](https://github.com/jomafer
 
     2. Modificar la clase **MainApp()**
 
-    ```bash
+    ```python
      # Crear las 5 pantallas
         MainApp.main_window = MainWindow(name="main_window")
         MainApp.second_window = SecondWindow(name="second_window")
