@@ -36,14 +36,22 @@ class Step6Panel(BoxLayout):
             self.open_question6_popup()
 
     def open_question6_popup(self):
-        """Abre popup con la información de este paso"""
-        info_text_1 = "Este panel permite enviar un reporte al email configurado.\n\n"
-        "[b]1. Introducir el correo electrónico:[/b]\n"
-        "   Haz click en la  imagen del [color=9D33FF] sobre [/color] que se encuentra en el centro de la pantalla :\n"
-        "[b]2. Enviar reporte:[/b]\n"
-        "   - Pulsa el botón [color=33FF57]'Enviar Email (Paso 6)'[/color] para que el servidor calcule los parámetros p, q, pi1, pi0 y E.\n\n"
+        """ Abre popup con la información de este paso """
+        info_text_1 = (
+            "Este es el último paso, donde se recopila toda la información de los pasos anteriores para generar y enviar un informe completo por email.\n\n"
+            "[b]1. Configurar Email:[/b]\n"
+            "   - Haz clic en el [color=9D33FF]icono del email[/color] para abrir el menú de configuración.\n"
+            "   - Introduce tu dirección de correo electrónico en el campo de texto.\n\n"
+            "[b]2. Enviar Informe:[/b]\n"
+            "   - Pulsa el botón [color=33FF57]'Enviar Email (Paso 6)'[/color]. La aplicación recopilará todos los datos de los pasos 1 al 5 y los enviará al servidor.\n\n"
+            "[b]3. Recibir Email:[/b]\n"
+            "   - El servidor generará un informe en formato PDF con todos los detalles y lo enviará a la dirección de email que proporcionaste."
+        )
 
-        popup = InfoPopup(title="Información Paso 8", info_text=info_text_1)
+        popup = InfoPopup(
+            title="Información Paso 8: Envío de Informe por Email",
+            info_text = info_text_1
+        )
         popup.open()
 
     def open_config_popup(self):
@@ -83,15 +91,9 @@ class Step6Panel(BoxLayout):
             # --- 1. Rescatar todos los DATOS DE ENTRADA (REQUESTS) ---
             rt_req_raw = summary_data.get("Softphone (Origen)", {})
             erlang_req_raw = summary_data.get("Parámetros Globales", {})
-            bw_req_raw = summary_data.get(
-                "Parámetros de Tráfico", {}
-            )  # <-- Nombre arreglado
-            cost_req_raw = summary_data.get(
-                "Parámetros de Costes", {}
-            )  # <-- Nombre arreglado
-            plr_req_raw = summary_data.get(
-                "Parámetros de PLR", {}
-            )  # <-- Nombre arreglado
+            bw_req_raw = summary_data.get("Parámetros de Tráfico", {}) # <-- Nombre arreglado
+            cost_req_raw = summary_data.get("Parámetros de Costes", {}) # <-- Nombre arreglado
+            plr_req_raw = summary_data.get("Parámetros de PLR", {})    # <-- Nombre arreglado
             email_req_raw = summary_data.get("Envio Email", {})
 
             # --- 2. Rescatar todas las RESPUESTAS (RESULTS) ---
@@ -100,6 +102,7 @@ class Step6Panel(BoxLayout):
             bw_resp_raw = getattr(app, "bw_results_data", {})
             cost_resp_raw = getattr(app, "cost_results_data", {})
             plr_resp_raw = getattr(app, "plr_results_data", {})
+
 
             # --- 3. Procesar datos que necesitan lógica (como en panel_3.py) ---
 
@@ -112,45 +115,24 @@ class Step6Panel(BoxLayout):
             # --- 4. Construir el PAYLOAD final ---
             payload = {
                 "email": email_req_raw.get("email"),
+
                 # --- PASO 1 ---
                 "RT_REQUEST": {
                     "codec": rt_req_raw.get("Codec"),
-                    "jitter": (
-                        float(rt_req_raw.get("Jitter (ms)"))
-                        if rt_req_raw.get("Jitter (ms)")
-                        else None
-                    ),
-                    "netDelay": (
-                        float(rt_req_raw.get("Retardo de Red (ms)"))
-                        if rt_req_raw.get("Retardo de Red (ms)")
-                        else None
-                    ),
+                    "jitter": float(rt_req_raw.get("Jitter (ms)")) if rt_req_raw.get("Jitter (ms)") else None,
+                    "netDelay": float(rt_req_raw.get("Retardo de Red (ms)")) if rt_req_raw.get("Retardo de Red (ms)") else None,
                 },
                 "RT_RESPONSE": rt_resp_raw,
+
                 # --- PASO 2 ---
                 "ERLANG_REQUEST": {
-                    "numLines": (
-                        int(erlang_req_raw.get("Num. Empresas"))
-                        if erlang_req_raw.get("Num. Empresas")
-                        else None
-                    ),
-                    "numCalls": (
-                        int(erlang_req_raw.get("Líneas / Cliente"))
-                        if erlang_req_raw.get("Líneas / Cliente")
-                        else None
-                    ),
-                    "avgDuration": (
-                        float(erlang_req_raw.get("T. Medio Llamada"))
-                        if erlang_req_raw.get("T. Medio Llamada")
-                        else None
-                    ),
-                    "blockingPercentage": (
-                        float(erlang_req_raw.get("Prob. Bloqueo"))
-                        if erlang_req_raw.get("Prob. Bloqueo")
-                        else None
-                    ),
+                    "numLines": int(erlang_req_raw.get("Num. Empresas")) if erlang_req_raw.get("Num. Empresas") else None,
+                    "numCalls": int(erlang_req_raw.get("Líneas / Cliente")) if erlang_req_raw.get("Líneas / Cliente") else None,
+                    "avgDuration": float(erlang_req_raw.get("T. Medio Llamada")) if erlang_req_raw.get("T. Medio Llamada") else None,
+                    "blockingPercentage": float(erlang_req_raw.get("Prob. Bloqueo")) if erlang_req_raw.get("Prob. Bloqueo") else None,
                 },
                 "ERLANG_RESPONSE": erlang_resp_raw,
+
                 # --- PASO 3 ---
                 "BW_REQUEST": {
                     # Datos rescatados de otros pasos
@@ -162,35 +144,33 @@ class Step6Panel(BoxLayout):
                     "reservedBW": bw_reserved,
                 },
                 "BW_RESPONSE": bw_resp_raw,
+
                 # --- PASO 4 ---
                 "COST_REQUEST": {
                     # Dato de este paso
-                    "Pmax": (
-                        float(cost_req_raw.get("Pmax"))
-                        if cost_req_raw.get("Pmax")
-                        else None
-                    ),
+                    "Pmax": float(cost_req_raw.get("Pmax")) if cost_req_raw.get("Pmax") else None,
                     # Datos rescatados de la respuesta del Paso 3
                     "callBW": {
                         "RTP": bw_resp_raw.get("uncompressed", {}).get("callBW"),
-                        "cRTP": bw_resp_raw.get("compressed", {}).get("callBW"),
+                        "cRTP": bw_resp_raw.get("compressed", {}).get("callBW")
                     },
                     "BWst": {
                         "RTP": bw_resp_raw.get("uncompressed", {}).get("BWst"),
-                        "cRTP": bw_resp_raw.get("compressed", {}).get("BWst"),
-                    },
+                        "cRTP": bw_resp_raw.get("compressed", {}).get("BWst")
+                    }
                 },
                 "COST_RESPONSE": cost_resp_raw,
+
                 # --- PASO 5 ---
-                "PLR_REQUEST": {"bitstream": plr_req_raw.get("Bitstream")},
-                "PLR_RESPONSE": plr_resp_raw,
+                "PLR_REQUEST": {
+                    "bitstream": plr_req_raw.get("Bitstream")
+                },
+                "PLR_RESPONSE": plr_resp_raw
             }
 
             # --- 5. Validación de Email ---
             if not payload["email"]:
-                self._show_error_popup(
-                    "El email no puede estar vacío. Configúralo primero."
-                )
+                self._show_error_popup("El email no puede estar vacío. Configúralo primero.")
                 return
 
             # --- 6. Envío ---
@@ -203,14 +183,15 @@ class Step6Panel(BoxLayout):
             print(json.dumps(payload, indent=2))
             # ---------------------------------------------------------------
 
+
         except (ValueError, KeyError, TypeError, AttributeError) as e:
             error_msg = f"Error al construir el informe: {str(e)}. Faltan datos de pasos anteriores. Asegúrate de pulsar 'Calcular' en TODOS los pasos."
             print(f"--- ERROR (PANEL 6): {error_msg}")
             self._show_error_popup(error_msg)
             # Imprime el traceback en la consola del cliente para depurar
             traceback.print_exc()
-
     # --- FIN DE LA FUNCIÓN CORREGIDA ---
+
 
     def _on_email_response(self, response):
         """Callback para procesar la respuesta REQUEST_RESPONSE."""
@@ -226,50 +207,22 @@ class Step6Panel(BoxLayout):
             self._show_error_popup(f"Error procesando respuesta REPORT: {str(e)}")
 
     def show_email_results(self):
-        """
-        Muestra un popup con el INFORME COMPLETO recibido del servidor,
-        o un mensaje de error si algo falló.
-        """
+        """Muestra un popup de éxito/fracaso del envío del informe."""
         app = App.get_running_app()
+        form = GridForm(cols=1)
+
         results = getattr(
             app,
             "email_results_data",
-            {"error": "Respuesta desconocida del servidor"},
+            {"status": "Respuesta desconocida"},
         )
 
-        # Comprobar si la respuesta contiene el informe
-        if "report" in results:
-            # ÉXITO: Mostrar el informe en un TextInput
-            title = "Informe Recibido del Servidor"
-            report_text = results["report"]
-
-            # Usamos TextInput para poder scrollear y ver el formato
-            content_widget = TextInput(
-                text=report_text, readonly=True, size_hint=(1, 1)
-            )
-
-            # Definimos un tamaño de popup grande
-            size_hint = (0.9, 0.9)  # 90% ancho, 90% alto
-
-        # Comprobar si la respuesta es un error
-        elif "error" in results:
-            # ERROR: Mostrar el mensaje de error
-            title = "Error del Servidor"
-            error_msg = f"Servicio: {results.get('source', 'Desconocido')}\n\nError: {results['error']}"
-
-            content_widget = Label(text=error_msg)
-            size_hint = (0.7, 0.4)  # Popup más pequeño para error
-
-        # Si es otro tipo de respuesta
-        else:
-            title = "Respuesta Recibida"
-            content_widget = Label(text=f"Respuesta:\n{str(results)}")
-            size_hint = (0.8, 0.5)
-
-        # --- Crear y abrir el popup ---
-        popup = ConfigPopup(
-            title_text=title, content_widget=content_widget, size_hint=size_hint
+        form.add_widget(Label(text="Informe enviado al servidor."))
+        form.add_widget(
+            Label(text=f"Respuesta del servidor: {results.get('status', str(results))}")
         )
+
+        popup = ConfigPopup(title_text="Informe Enviado", content_widget=form)
         popup.open()
 
     def _create_input_field(self, form, label_text, default_value, input_type):
