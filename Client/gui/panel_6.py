@@ -37,7 +37,11 @@ class Step6Panel(BoxLayout):
 
     def open_question6_popup(self):
         """Abre popup con la información de este paso"""
-        info_text_1 = "Añadir información del envío del correo electrónico"
+        info_text_1 = "Este panel permite enviar un reporte al email configurado.\n\n"
+        "[b]1. Introducir el correo electrónico:[/b]\n"
+        "   Haz click en la  imagen del [color=9D33FF] sobre [/color] que se encuentra en el centro de la pantalla :\n"
+        "[b]2. Enviar reporte:[/b]\n"
+        "   - Pulsa el botón [color=33FF57]'Enviar Email (Paso 6)'[/color] para que el servidor calcule los parámetros p, q, pi1, pi0 y E.\n\n"
 
         popup = InfoPopup(title="Información Paso 8", info_text=info_text_1)
         popup.open()

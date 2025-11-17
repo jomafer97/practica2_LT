@@ -46,7 +46,8 @@ class MessageSender:
         port = MessageSender.MESSAGE_PORTS.get(msg_type, 32003)
 
         client = ClientSocket()
-        addr = ("127.0.0.1", port)
+        # addr = ("172.20.10.14", port)
+        addr = ("!27.0.0.0", port)
         try:
             client.send_message(message, addr)
             answer, _ = client.recv_message(8192)
