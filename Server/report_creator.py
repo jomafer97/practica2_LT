@@ -17,6 +17,7 @@ SMTP_SERVER = ""
 SMTP_PORT = 587
 # --------------------
 
+
 class Report_creator_service:
     """
     Servicio de red para generar y distribuir informes de cálculo de VoIP.
@@ -77,32 +78,32 @@ class Report_creator_service:
 
             y_position = MARGIN_TOP
 
-            lines = report_text.split('\n')
+            lines = report_text.split("\n")
 
             for line in lines:
                 # --- Lógica de Formato ---
 
                 # 1. Si la línea es un separador '==='
                 if line.startswith("==="):
-                    y_position -= (LINE_HEIGHT / 2)
+                    y_position -= LINE_HEIGHT / 2
                     c.setStrokeColorRGB(0.6, 0.6, 0.6)
                     c.line(MARGIN_X, y_position, width - MARGIN_X, y_position)
-                    y_position -= (LINE_HEIGHT * 1.5)
+                    y_position -= LINE_HEIGHT * 1.5
 
                 # 2. Si es el título principal
                 elif "INFORME DE CALCULO VoIP" in line:
                     c.setFont(FONT_TITULO, 18)
                     c.drawCentredString(width / 2, y_position, line.strip())
-                    y_position -= (LINE_HEIGHT * 2.5)
+                    y_position -= LINE_HEIGHT * 2.5
 
                 # 3. Si es un título de sección "--- ... ---"
                 elif line.strip().startswith("---") and line.strip().endswith("---"):
-                    y_position -= (LINE_HEIGHT / 2)
+                    y_position -= LINE_HEIGHT / 2
                     c.setFont(FONT_TITULO, 14)
                     c.setFillColorRGB(0.1, 0.1, 0.4)
                     c.drawString(MARGIN_X, y_position, line.strip().replace("---", ""))
                     c.setFillColorRGB(0, 0, 0)
-                    y_position -= (LINE_HEIGHT * 1.5)
+                    y_position -= LINE_HEIGHT * 1.5
 
                 # 4. Si es una fórmula o línea con resultado (contiene '=')
                 elif "=" in line:
@@ -150,24 +151,34 @@ class Report_creator_service:
             return
 
         msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = receiver_email
-        msg['Subject'] = subject
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = receiver_email
+        msg["Subject"] = subject
 
         # 1. Cuerpo del mensaje
-        msg.attach(MIMEText("Estimado usuario,\n\n Se adjunta el informe detallado de los cálculos que ha realizado con la aplicación.\n\nUn saludo.", 'plain'))
+        msg.attach(
+            MIMEText(
+                "Estimado usuario,\n\n Se adjunta el informe detallado de los cálculos que ha realizado con la aplicación.\n\nUn saludo.",
+                "plain",
+            )
+        )
 
         # 2. Adjuntar el PDF
         try:
             with open(pdf_filename, "rb") as attachment:
-                part = MIMEBase('application', 'octet-stream')
+                part = MIMEBase("application", "octet-stream")
                 part.set_payload(attachment.read())
 
             encoders.encode_base64(part)
-            part.add_header('Content-Disposition', f"attachment; filename= {os.path.basename(pdf_filename)}")
+            part.add_header(
+                "Content-Disposition",
+                f"attachment; filename= {os.path.basename(pdf_filename)}",
+            )
             msg.attach(part)
         except FileNotFoundError:
-            self.logger.error(f"{self.ID}: Generated PDF file not found for attachment.")
+            self.logger.error(
+                f"{self.ID}: Generated PDF file not found for attachment."
+            )
             return
 
         # 3. Conexión y Envío
@@ -176,7 +187,9 @@ class Report_creator_service:
                 server.starttls()
                 server.login(SENDER_EMAIL, SENDER_PASSWORD)
                 server.sendmail(SENDER_EMAIL, receiver_email, msg.as_string())
-            self.logger.info(f"{self.ID}: PDF report successfully sent to {receiver_email}.")
+            self.logger.info(
+                f"{self.ID}: PDF report successfully sent to {receiver_email}."
+            )
 
         except Exception as e:
             self.logger.error(f"{self.ID}: Error sending report: {e}")
@@ -245,8 +258,12 @@ class Report_creator_service:
         reporte += "Coste Mbps = 100 euros\n"
         reporte += f"Coste RTP = {cost_req['BWst']['RTP']} * 100 euros\n"
         reporte += f"Coste cRTP = {cost_req['BWst']['cRTP']} * 100 euros\n"
-        reporte += f"Llamadas Posibles RTP = {cost_res['RTP']['possibleCalls']} llamadas\n"
-        reporte += f"Llamadas Posibles cRTP = {cost_res['cRTP']['possibleCalls']} llamadas\n"
+        reporte += (
+            f"Llamadas Posibles RTP = {cost_res['RTP']['possibleCalls']} llamadas\n"
+        )
+        reporte += (
+            f"Llamadas Posibles cRTP = {cost_res['cRTP']['possibleCalls']} llamadas\n"
+        )
 
         # --- PLR (Pérdida de Paquetes) ---
         reporte += "--- PLR (Modelo de Markov) ---\n"
@@ -310,7 +327,9 @@ class Report_creator_service:
         """
         pdf_filename = None
         try:
-            self.logger.info(f"{self.ID}: Message received from client {addr}:\n{message}")
+            self.logger.info(
+                f"{self.ID}: Message received from client {addr}:\n{message}"
+            )
 
             # 1. Extracción
             report_request_data = message
@@ -325,17 +344,14 @@ class Report_creator_service:
             receiver_email = report_request_data.get("email")
 
             if pdf_filename and receiver_email:
-                 self._send_email_with_pdf(
-                     receiver_email,
-                     subject=f"Informe Practica 2 resultados VoIP",
-                     pdf_filename=pdf_filename
-                 )
+                self._send_email_with_pdf(
+                    receiver_email,
+                    subject=f"Informe Practica 2 resultados VoIP",
+                    pdf_filename=pdf_filename,
+                )
 
             # 5. Construcción de la Respuesta
-            response = build_message(
-                "REPORT_RESPONSE",
-                report=plain_report_text
-            )
+            response = build_message("REPORT_RESPONSE", report=plain_report_text)
             self.logger.info(f"{self.ID}: Task finished and response ready.")
 
         except Exception as e:
@@ -350,7 +366,6 @@ class Report_creator_service:
                     self.logger.info(f"{self.ID}: Cleaned up PDF: {pdf_filename}")
                 except Exception as e:
                     self.logger.error(f"{self.ID}: Failed to remove PDF: {e}")
-
 
             if self.serviceSocket:
                 self.serviceSocket.send_message(response, addr)
@@ -371,9 +386,7 @@ class Report_creator_service:
                 validate_message(message, "REPORT_REQUEST")
 
                 thread = threading.Thread(
-                    target=self.task,
-                    args=(message, addr),
-                    daemon=True
+                    target=self.task, args=(message, addr), daemon=True
                 )
 
                 thread.start()

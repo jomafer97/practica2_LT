@@ -5,8 +5,8 @@ from kivy.uix.spinner import Spinner
 from .popups import ConfigPopup, GridForm, InfoPopup
 from kivy.app import App
 import os, sys
-import json  # <-- AÑADIDO
-import traceback  # <-- AÑADIDO
+import json
+import traceback
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if project_root not in sys.path:
